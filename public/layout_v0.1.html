@@ -1,0 +1,2635 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>줄넘기 체크 · 화면 레이아웃 v0.2</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ==================================================================
+   Kenney UI Pack Blue/Default 에셋 기반 디자인 토큰
+   — 버튼·체크·별·화살표는 실제 PNG 에셋을 사용하거나, 톤을 맞춤
+================================================================== */
+:root {
+  /* Kenney UI Pack Blue 팔레트 (에셋에서 추출) */
+  --k-blue-hi:      #3fc8f1;   /* 버튼 하이라이트 탑 */
+  --k-blue:         #1ea9da;   /* 기본 블루 */
+  --k-blue-mid:     #1a95c4;   /* 버튼 그라디언트 하단 */
+  --k-blue-depth:   #14759d;   /* Depth(입체) 어두운 부분 */
+  --k-blue-outline: #0f5d7f;   /* 외곽 아웃라인 */
+  --k-blue-soft:    #e3f4fc;   /* 아주 연한 블루 배경 */
+  --k-blue-soft-2:  #cfeaf7;
+
+  /* 중립 */
+  --bg:         #ffffff;
+  --bg-soft:    #fbfbfc;
+  --panel:      #ffffff;
+  --panel-sub:  #f5f7fa;
+  --ink:        #13344b;     /* 본문 텍스트 — 블루 블랙 톤 */
+  --ink-sub:    #5a7186;
+  --ink-mut:    #99a9ba;
+  --line:       #e4ebf2;
+  --line-2:     #cfdae6;
+
+  /* 포인트 */
+  --gold:       #ffd23f;
+  --gold-dark:  #c79200;
+
+  --font-kr:  'Pretendard', 'Gowun Dodum', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+  --font-num: 'Kenney Future', 'Pretendard', sans-serif;
+
+  --shadow-1: 0 1px 2px rgba(19,52,75,.04), 0 2px 8px rgba(19,52,75,.06);
+  --shadow-2: 0 10px 30px rgba(19,52,75,.10);
+}
+
+@font-face {
+  font-family: 'Kenney Future';
+  src: url('UI%20assets/UI%20Pack/Font/Kenney%20Future.ttf') format('truetype');
+  font-weight: normal; font-style: normal;
+  font-display: swap;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-kr);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
+}
+
+/* ------------------------------------------------------------------
+   Kenney 스타일 버튼 — 에셋 톤 그대로 재현
+------------------------------------------------------------------ */
+.kbtn {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px;
+  padding: 12px 20px 16px;  /* 하단 depth 공간 */
+  border: 1.5px solid var(--k-blue-outline);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg,
+      var(--k-blue-hi)  0%,
+      var(--k-blue)     55%,
+      var(--k-blue-mid) 82%);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255,255,255,.55),
+    inset 0 -5px 0 var(--k-blue-depth),
+    inset 0 -6.5px 0 rgba(10,65,90,.45),
+    0 2px 0 rgba(15,93,127,.25);
+  color: #fff;
+  font-weight: 800;
+  font-size: 14px;
+  text-shadow: 0 1px 0 rgba(10,65,90,.35);
+  cursor: pointer;
+  transition: transform .08s ease;
+}
+.kbtn:active { transform: translateY(1px); }
+.kbtn.block { display: flex; width: 100%; }
+.kbtn.sm { padding: 8px 14px 11px; font-size: 12px; border-radius: 9px; }
+.kbtn.lg { padding: 15px 22px 20px; font-size: 16px; border-radius: 14px; }
+
+/* 외곽선 버전 (버튼_rectangle_border 에셋 느낌) */
+.kbtn-outline {
+  background: #f2f7fb;
+  color: var(--k-blue-depth);
+  border: 1.5px solid var(--k-blue-outline);
+  box-shadow:
+    inset 0 1.5px 0 #fff,
+    inset 0 -3px 0 #cfdae6,
+    inset 0 -4.5px 0 #a9bdce;
+  text-shadow: none;
+}
+
+/* 라운드 버튼 (아이콘용) */
+.kbtn-round {
+  width: 44px; height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--k-blue-outline);
+  background:
+    linear-gradient(180deg,
+      var(--k-blue-hi) 0%,
+      var(--k-blue) 55%,
+      var(--k-blue-mid) 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.5),
+    inset 0 -5px 0 var(--k-blue-depth),
+    inset 0 -6px 0 rgba(10,65,90,.35),
+    0 2px 0 rgba(15,93,127,.2);
+  display: inline-grid; place-items: center;
+  color: #fff;
+}
+.kbtn-round.sm { width: 34px; height: 34px; border-radius: 50%; }
+
+/* 사각 아이콘 버튼 */
+.kbtn-square {
+  width: 44px; height: 44px; padding: 0;
+  border-radius: 10px;
+}
+
+/* ------------------------------------------------------------------
+   Kenney 에셋 이미지 (실제 PNG 로드)
+------------------------------------------------------------------ */
+.k-img {
+  display: inline-block;
+  vertical-align: middle;
+  image-rendering: -webkit-optimize-contrast;
+}
+.k-chk  { width: 22px; height: 22px; }
+.k-star { width: 20px; height: 20px; }
+.k-arr  { width: 16px; height: 16px; }
+
+/* ------------------------------------------------------------------
+   SVG 아이콘 시스템 (모노라인, Kenney 블루 톤)
+------------------------------------------------------------------ */
+.ic {
+  width: 20px; height: 20px;
+  stroke: currentColor; stroke-width: 1.7;
+  fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
+  flex-shrink: 0;
+}
+.ic-sm { width: 16px; height: 16px; }
+.ic-lg { width: 28px; height: 28px; }
+.ic-xl { width: 36px; height: 36px; }
+
+/* ------------------------------------------------------------------
+   상단 네비
+------------------------------------------------------------------ */
+.doc-nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(255,255,255,.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.doc-nav-inner {
+  max-width: 1440px; margin: 0 auto;
+  padding: 14px 28px;
+  display: flex; align-items: center; gap: 22px;
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 17px; color: var(--k-blue-depth);
+}
+.brand-mark {
+  width: 30px; height: 30px; border-radius: 9px;
+  background: linear-gradient(180deg, var(--k-blue-hi), var(--k-blue-mid));
+  border: 1.5px solid var(--k-blue-outline);
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.55), inset 0 -3px 0 var(--k-blue-depth);
+  display: grid; place-items: center;
+  color: #fff; font-family: var(--font-num); font-size: 12px;
+  text-shadow: 0 1px 0 rgba(0,0,0,.25);
+}
+.doc-nav-links {
+  display: flex; gap: 2px; flex-wrap: wrap; flex: 1;
+}
+.doc-nav-links a {
+  text-decoration: none; color: var(--ink-sub);
+  font-size: 13px; font-weight: 500;
+  padding: 6px 10px; border-radius: 8px;
+  transition: background .15s, color .15s;
+}
+.doc-nav-links a:hover { background: var(--k-blue-soft); color: var(--k-blue-depth); }
+.doc-nav-meta { font-size: 12px; color: var(--ink-mut); display: flex; gap: 14px; }
+.pill {
+  font-family: var(--font-num); font-size: 11px;
+  padding: 3px 10px; border-radius: 999px;
+  background: var(--k-blue); color: #fff;
+  border: 1px solid var(--k-blue-outline);
+}
+
+/* ------------------------------------------------------------------
+   헤더 / 섹션
+------------------------------------------------------------------ */
+.hero {
+  max-width: 1440px; margin: 0 auto;
+  padding: 56px 28px 20px;
+}
+.hero h1 {
+  font-size: 40px; font-weight: 800;
+  margin: 0 0 10px; letter-spacing: -0.03em;
+}
+.hero h1 em { font-style: normal; color: var(--k-blue); }
+.hero-sub { color: var(--ink-sub); font-size: 15px; max-width: 780px; line-height: 1.65; }
+.hero-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+.tag {
+  font-size: 12px; font-weight: 600;
+  padding: 6px 12px; border-radius: 999px;
+  background: #fff; color: var(--k-blue-depth);
+  border: 1.5px solid var(--line-2);
+}
+.tag.accent { background: var(--k-blue); color: #fff; border-color: var(--k-blue-outline); }
+
+.section { max-width: 1440px; margin: 0 auto; padding: 36px 28px 0; }
+.section-head {
+  display: flex; align-items: baseline; gap: 14px; margin-bottom: 18px;
+  padding-bottom: 14px; border-bottom: 2px dashed var(--line-2);
+}
+.section-num {
+  font-family: var(--font-num); font-size: 14px; color: var(--k-blue-depth);
+  padding: 4px 10px; background: var(--k-blue-soft);
+  border: 1.5px solid var(--line-2); border-radius: 8px;
+}
+.section-title { font-size: 24px; font-weight: 800; margin: 0; }
+.section-desc { color: var(--ink-sub); font-size: 14px; margin-left: auto; }
+
+/* ------------------------------------------------------------------
+   화면 프레임
+------------------------------------------------------------------ */
+.screens {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 28px; padding-bottom: 28px;
+}
+.phone {
+  background: linear-gradient(180deg, #1a2442, #0b1530);
+  border-radius: 42px; padding: 14px;
+  box-shadow: var(--shadow-2); position: relative;
+}
+.phone::after {
+  content: ''; position: absolute; top: 22px; left: 50%; transform: translateX(-50%);
+  width: 110px; height: 24px; background: #000; border-radius: 0 0 16px 16px; z-index: 2;
+}
+.phone-screen {
+  background: #fff; border-radius: 30px; overflow: hidden;
+  position: relative; aspect-ratio: 9/18;
+  display: flex; flex-direction: column;
+}
+.status-bar {
+  height: 38px; padding: 0 22px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: var(--font-num); font-size: 12px; color: var(--ink);
+}
+.status-bar .right { display: flex; gap: 8px; align-items: center; }
+.phone-body { flex: 1; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+.phone-caption {
+  color: var(--ink-sub); font-size: 13px;
+  margin-top: 12px; text-align: center; line-height: 1.55;
+}
+.phone-caption strong { color: var(--ink); }
+
+/* ------------------------------------------------------------------
+   공통 모바일 컴포넌트
+------------------------------------------------------------------ */
+.m-header {
+  padding: 14px 18px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  background: #fff;
+}
+.m-title { font-weight: 800; font-size: 16px; color: var(--ink); }
+.m-icon-btn {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--panel-sub); border: 1.5px solid var(--line);
+  display: grid; place-items: center; color: var(--k-blue-depth);
+  cursor: pointer;
+}
+.m-body { flex: 1; overflow: auto; padding: 18px; background: var(--bg); }
+
+.card {
+  background: #fff; border: 1.5px solid var(--line);
+  border-radius: 14px; padding: 14px;
+}
+
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 700;
+  padding: 3px 9px; border-radius: 999px;
+  background: var(--k-blue-soft); color: var(--k-blue-depth);
+  border: 1px solid var(--k-blue-soft-2);
+}
+.chip.gold { background: #fff6d0; color: #8a6200; border-color: #ffe38a; }
+.chip.soft { background: var(--panel-sub); color: var(--ink-sub); border-color: var(--line); }
+
+/* 하단 탭바 */
+.tabbar {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  border-top: 1.5px solid var(--line); background: #fff;
+  padding: 8px 4px 10px; flex-shrink: 0;
+}
+.tab-item { text-align: center; padding: 4px; cursor: pointer; }
+.tab-ico {
+  width: 30px; height: 30px; margin: 0 auto 2px;
+  background: var(--panel-sub); border-radius: 10px;
+  display: grid; place-items: center;
+  color: var(--ink-mut);
+}
+.tab-lbl { font-size: 10px; color: var(--ink-mut); font-weight: 600; }
+.tab-item.active .tab-ico {
+  background: linear-gradient(180deg, var(--k-blue-hi), var(--k-blue-mid));
+  color: #fff;
+  border: 1.5px solid var(--k-blue-outline);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.45), inset 0 -3px 0 var(--k-blue-depth);
+}
+.tab-item.active .tab-lbl { color: var(--k-blue-depth); }
+
+/* ------------------------------------------------------------------
+   01. 로그인 (SSO 제거, 심플)
+------------------------------------------------------------------ */
+.login-screen {
+  background: #fff;
+  height: 100%;
+  padding: 40px 24px 24px;
+  display: flex; flex-direction: column;
+}
+.login-logo {
+  width: 92px; height: 92px; border-radius: 26px;
+  background: linear-gradient(180deg, var(--k-blue-hi), var(--k-blue-mid));
+  border: 2px solid var(--k-blue-outline);
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.5),
+    inset 0 -7px 0 var(--k-blue-depth),
+    0 6px 0 rgba(15,93,127,.2);
+  display: grid; place-items: center;
+  font-family: var(--font-num); font-size: 30px; color: #fff;
+  margin: 14px auto 16px;
+  text-shadow: 0 2px 0 rgba(0,0,0,.25);
+}
+.login-title {
+  text-align: center; font-size: 24px; font-weight: 800;
+  margin: 0 0 4px; color: var(--ink);
+}
+.login-sub {
+  text-align: center; font-size: 12px; color: var(--ink-sub);
+  margin-bottom: 28px;
+}
+.login-tabs {
+  background: var(--panel-sub);
+  border: 1.5px solid var(--line);
+  padding: 4px; border-radius: 12px;
+  display: grid; grid-template-columns: 1fr 1fr;
+  margin-bottom: 20px;
+}
+.login-tab {
+  padding: 10px; border-radius: 9px;
+  text-align: center; font-weight: 700; font-size: 13px;
+  color: var(--ink-sub); cursor: pointer;
+}
+.login-tab.active {
+  background: linear-gradient(180deg, var(--k-blue-hi), var(--k-blue-mid));
+  color: #fff;
+  border: 1.5px solid var(--k-blue-outline);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.45), inset 0 -3px 0 var(--k-blue-depth);
+  text-shadow: 0 1px 0 rgba(0,0,0,.2);
+}
+.login-input {
+  background: #fff;
+  border: 1.5px solid var(--line-2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  color: var(--ink-mut); font-size: 13px; font-weight: 500;
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 10px;
+}
+.login-input .ic { color: var(--k-blue); }
+.login-foot {
+  margin-top: auto;
+  text-align: center; font-size: 11px; color: var(--ink-mut);
+  padding-top: 14px;
+}
+
+/* ------------------------------------------------------------------
+   02. 초대코드
+------------------------------------------------------------------ */
+.invite-screen {
+  height: 100%;
+  padding: 22px 22px;
+  background: #fff;
+  display: flex; flex-direction: column;
+}
+.invite-hero {
+  margin: 8px auto 4px;
+  width: 110px; height: 110px;
+  background:
+    radial-gradient(circle at 32% 28%, #fff, var(--k-blue-soft) 60%, var(--k-blue-soft-2));
+  border: 2px solid var(--k-blue-outline);
+  border-radius: 50%;
+  display: grid; place-items: center;
+  color: var(--k-blue-depth);
+  box-shadow:
+    inset 0 3px 0 rgba(255,255,255,.7),
+    inset 0 -8px 0 rgba(10,65,90,.08),
+    0 6px 0 rgba(15,93,127,.15);
+}
+.code-input {
+  display: grid; grid-template-columns: repeat(6,1fr);
+  gap: 6px; margin: 22px 0 6px;
+}
+.code-input div {
+  aspect-ratio: 1;
+  background: #fff; border: 1.5px solid var(--line-2);
+  border-radius: 11px;
+  display: grid; place-items: center;
+  font-family: var(--font-num); font-size: 18px; color: var(--ink);
+}
+.code-input div.filled {
+  background: linear-gradient(180deg, var(--k-blue-hi), var(--k-blue-mid));
+  color: #fff;
+  border-color: var(--k-blue-outline);
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.5), inset 0 -4px 0 var(--k-blue-depth);
+  text-shadow: 0 1px 0 rgba(0,0,0,.2);
+}
+.code-input div.active {
+  border: 2.5px solid var(--k-blue); color: var(--k-blue);
+}
+
+/* ------------------------------------------------------------------
+   03. 어드민 대시보드 — 화이트 베이스
+------------------------------------------------------------------ */
+.admin-screen { height: 100%; display: flex; flex-direction: column; background: #fff; }
+.admin-head {
+  padding: 18px 18px 16px;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+}
+.admin-head-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px; color: var(--ink-sub);
+}
+.admin-head h3 {
+  margin: 8px 0 14px; font-size: 19px; font-weight: 800; color: var(--ink);
+}
+.kpi-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.kpi {
+  background: var(--k-blue-soft);
+  border: 1.5px solid var(--k-blue-soft-2);
+  border-radius: 12px; padding: 12px 8px;
+  text-align: center;
+}
+.kpi-num {
+  font-family: var(--font-num); font-size: 19px; font-weight: 800;
+  color: var(--k-blue-depth);
+}
+.kpi-lbl { font-size: 10px; color: var(--ink-sub); margin-top: 3px; font-weight: 600; }
+
+.admin-body { flex: 1; overflow: auto; padding: 16px; background: #fff; }
+.sub-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin: 4px 0 10px;
+}
+.sub-head h4 { margin: 0; font-size: 14px; font-weight: 800; color: var(--ink); display: flex; gap: 6px; align-items: center; }
+.more-link { font-size: 11px; color: var(--k-blue-depth); font-weight: 700; cursor: pointer; }
+
+.member-row {
+  background: #fff; border: 1.5px solid var(--line);
+  border-radius: 14px; padding: 12px;
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 8px;
+}
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: linear-gradient(180deg, var(--k-blue-hi), var(--k-blue));
+  color: #fff; font-weight: 800; font-size: 14px;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  border: 1.5px solid var(--k-blue-outline);
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.45), inset 0 -4px 0 var(--k-blue-depth);
+  text-shadow: 0 1px 0 rgba(0,0,0,.2);
+}
+.avatar.gold { background: linear-gradient(180deg, #ffd969, #f0a400); border-color: #a87600; box-shadow: inset 0 1.5px 0 rgba(255,255,255,.55), inset 0 -4px 0 #b37e00; }
+.avatar.silver { background: linear-gradient(180deg, #e5ebf4, #9aa7c0); color: #2a3244; border-color: #5a6a85; box-shadow: inset 0 1.5px 0 rgba(255,255,255,.55), inset 0 -4px 0 #6a7a93; text-shadow: none; }
+.avatar.bronze { background: linear-gradient(180deg, #fbaf7a, #d46f33); border-color: #7c3912; box-shadow: inset 0 1.5px 0 rgba(255,255,255,.4), inset 0 -4px 0 #9c501a; }
+
+.member-info { flex: 1; min-width: 0; }
+.member-info .n { font-size: 13px; font-weight: 800; color: var(--ink); }
+.member-info .s { font-size: 11px; color: var(--ink-sub); margin-top: 2px; display:flex; gap:4px; align-items:center; }
+.member-meta { text-align: right; }
+.member-meta .count {
+  font-family: var(--font-num); font-size: 15px; color: var(--k-blue-depth);
+  font-weight: 800;
+}
+.member-meta .lbl { font-size: 10px; color: var(--ink-mut); }
+
+.rank-medal {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: var(--font-num); font-size: 12px; color: #fff;
+  flex-shrink: 0;
+  border: 1.5px solid;
+}
+.rank-medal.g { background: linear-gradient(180deg,#ffd969,#f0a400); border-color: #a87600; }
+.rank-medal.s { background: linear-gradient(180deg,#e5ebf4,#9aa7c0); color:#2a3244; border-color: #5a6a85; }
+.rank-medal.b { background: linear-gradient(180deg,#fbaf7a,#d46f33); border-color: #7c3912; }
+
+/* ------------------------------------------------------------------
+   04. 회원 상세
+------------------------------------------------------------------ */
+.detail-screen { height: 100%; display: flex; flex-direction: column; background: #fff; }
+.detail-body { flex: 1; overflow: auto; padding: 16px; background: #fff; }
+.profile-hero {
+  background: linear-gradient(180deg, var(--k-blue-hi) 0%, var(--k-blue-mid) 100%);
+  border: 1.5px solid var(--k-blue-outline);
+  border-radius: 16px; padding: 16px;
+  color: #fff; margin-bottom: 14px;
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.4),
+    inset 0 -6px 0 var(--k-blue-depth);
+  text-shadow: 0 1px 0 rgba(0,0,0,.15);
+}
+.dial {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
+  background: #fff; border: 1.5px solid var(--line);
+  border-radius: 14px; padding: 12px;
+  margin-bottom: 12px;
+}
+.dial-col { text-align: center; }
+.dial-col .n { font-family: var(--font-num); font-size: 19px; color: var(--k-blue-depth); font-weight: 800; }
+.dial-col .l { font-size: 10px; color: var(--ink-sub); margin-top: 2px; font-weight: 600; }
+
+.log-item {
+  background: #fff; border: 1.5px solid var(--line);
+  border-radius: 12px;
+  padding: 12px; margin-bottom: 6px;
+  display: flex; gap: 10px; align-items: center;
+  font-size: 12px;
+}
+.log-ico {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--k-blue-soft);
+  color: var(--k-blue-depth);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.log-main { flex: 1; min-width: 0; }
+.log-main .t { font-weight: 800; color: var(--ink); }
+.log-main .d { font-size: 10px; color: var(--ink-mut); margin-top: 2px; }
+.log-n { font-family: var(--font-num); color: var(--k-blue-depth); font-weight: 800; }
+
+/* 달력 */
+.cal {
+  display: grid; grid-template-columns: repeat(7,1fr); gap: 4px;
+  margin-top: 6px;
+}
+.cal .dh {
+  aspect-ratio: 1;
+  display: grid; place-items: center;
+  font-size: 10px; color: var(--ink-mut); font-weight: 700;
+}
+.cal .dd {
+  aspect-ratio: 1;
+  background: var(--panel-sub); border-radius: 10px;
+  display: grid; place-items: center;
+  font-size: 11px; color: var(--ink-sub);
+  position: relative;
+}
+.cal .dd.check {
+  background: linear-gradient(180deg, var(--k-blue-hi), var(--k-blue-mid));
+  color: #fff; font-weight: 800;
+  border: 1.5px solid var(--k-blue-outline);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.45), inset 0 -3px 0 var(--k-blue-depth);
+  text-shadow: 0 1px 0 rgba(0,0,0,.2);
+}
+.cal .dd.today {
+  border: 2px solid var(--k-blue);
+  color: var(--k-blue-depth); font-weight: 800;
+  background: #fff;
+}
+
+/* ------------------------------------------------------------------
+   05. 마이페이지
+------------------------------------------------------------------ */
+.my-screen { height: 100%; display: flex; flex-direction: column; background: #fff; }
+.my-head {
+  padding: 18px 18px 16px;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+}
+.level-bar {
+  margin-top: 12px;
+  background: var(--panel-sub);
+  border: 1.5px solid var(--line);
+  border-radius: 999px; height: 12px; overflow: hidden;
+}
+.level-bar i {
+  display: block; height: 100%;
+  width: 68%;
+  background: linear-gradient(180deg, var(--k-blue-hi), var(--k-blue-mid));
+  border-right: 1.5px solid var(--k-blue-outline);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -2px 0 var(--k-blue-depth);
+  border-radius: 999px;
+}
+.level-row {
+  display: flex; justify-content: space-between;
+  font-size: 11px; margin-top: 6px; color: var(--ink-sub); font-weight: 600;
+}
+.my-body { flex: 1; overflow: auto; padding: 16px; background: #fff; }
+
+.stat-card {
+  background: #fff; border: 1.5px solid var(--line);
+  border-radius: 14px; padding: 14px;
+  margin-bottom: 12px;
+}
+.bar-chart {
+  display: flex; align-items: flex-end; gap: 8px;
+  height: 84px; margin-top: 10px; padding: 0 2px;
+}
+.bar {
+  flex: 1;
+  background: linear-gradient(180deg, var(--k-blue-hi), var(--k-blue-mid));
+  border: 1.5px solid var(--k-blue-outline);
+  border-radius: 6px 6px 3px 3px;
+  position: relative;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -3px 0 var(--k-blue-depth);
+}
+.bar.today {
+  background: linear-gradient(180deg, #ffd969, #f0a400);
+  border-color: #a87600;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 -3px 0 #b37e00;
+}
+.bar span {
+  position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%);
+  font-size: 10px; color: var(--ink-sub); font-weight: 600;
+}
+
+.item-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+.item {
+  aspect-ratio: 1;
+  background: var(--panel-sub);
+  border-radius: 12px;
+  display: grid; place-items: center;
+  border: 1.5px solid var(--line);
+  color: var(--ink-sub);
+}
+.item.owned {
+  background: var(--k-blue-soft);
+  border-color: var(--k-blue);
+  color: var(--k-blue-depth);
+}
+.item.locked { opacity: .4; }
+
+/* ------------------------------------------------------------------
+   06. 게임 모드 선택
+------------------------------------------------------------------ */
+.pick-screen { height: 100%; display: flex; flex-direction: column; background: #fff; }
+.pick-body { flex: 1; overflow: auto; padding: 16px; background: #fff; }
+.game-card {
+  position: relative; border-radius: 18px;
+  overflow: hidden; margin-bottom: 14px;
+  aspect-ratio: 16/11;
+  cursor: pointer;
+  border: 1.5px solid var(--line);
+  box-shadow: var(--shadow-1);
+}
+.game-card .bg { position: absolute; inset: 0; }
+.game-card.meadow .bg {
+  background:
+    radial-gradient(ellipse at 50% 120%, #7ed87e 0%, transparent 60%),
+    linear-gradient(180deg, #bfe9ff 0%, #e9f7ff 55%, #b9e3a6 55%, #7bc57a 100%);
+}
+.game-card.racing .bg {
+  background:
+    linear-gradient(180deg, #b9d7ff 0%, #5891e6 40%, #232a4c 42%, #0e1230 100%);
+}
+.game-card .foreground {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 16px; color: #fff;
+}
+.game-card .gc-badge {
+  align-self: flex-start;
+  background: rgba(255,255,255,.95);
+  color: var(--k-blue-depth);
+  font-size: 10px; font-weight: 800;
+  padding: 5px 10px; border-radius: 999px;
+  border: 1px solid rgba(15,93,127,.2);
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.game-card h4 { margin: 0; font-size: 22px; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,.35); }
+.game-card p { margin: 2px 0 0; font-size: 12px; text-shadow: 0 1px 4px rgba(0,0,0,.3); opacity: .95; }
+.sun {
+  position: absolute; top: 14px; right: 14px;
+  width: 42px; height: 42px; border-radius: 50%;
+  background: radial-gradient(circle, #fff4a3, #ffd23f);
+  box-shadow: 0 0 20px rgba(255,210,63,.6);
+  border: 1.5px solid #d39a00;
+}
+.cloud {
+  position: absolute; background: #fff; border-radius: 999px;
+}
+.cloud.c1 { width: 60px; height: 20px; top: 24px; left: 20px; }
+.cloud.c2 { width: 42px; height: 14px; top: 42px; right: 30px; }
+.char-sil {
+  position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+  width: 72px; height: 96px;
+}
+.road-lines {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 50%;
+  background:
+    linear-gradient(90deg, transparent 48%, var(--gold) 48%, var(--gold) 52%, transparent 52%),
+    linear-gradient(180deg, #3b4168, #0f1230);
+  mask: linear-gradient(180deg, transparent 0%, #000 20%, #000 100%);
+}
+.car-sil {
+  position: absolute; bottom: 14%; left: 50%; transform: translateX(-50%);
+  width: 76px; height: 30px;
+  background: linear-gradient(180deg, var(--k-blue-hi), var(--k-blue-mid));
+  border: 1.5px solid var(--k-blue-outline);
+  border-radius: 10px;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.5), inset 0 -4px 0 var(--k-blue-depth), 0 8px 14px rgba(0,0,0,.5);
+}
+.car-sil::before {
+  content: ''; position: absolute; top: -9px; left: 18px;
+  width: 40px; height: 12px;
+  background: linear-gradient(180deg, var(--k-blue-hi), var(--k-blue));
+  border: 1.5px solid var(--k-blue-outline);
+  border-radius: 7px 7px 3px 3px;
+}
+
+/* ------------------------------------------------------------------
+   07. 카메라 세팅
+------------------------------------------------------------------ */
+.cam-screen {
+  height: 100%; position: relative;
+  background: #0f1c2c;
+  color: #fff; overflow: hidden;
+}
+.cam-screen::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, #223a52, #0f1c2c);
+}
+.cam-top {
+  position: absolute; top: 50px; left: 14px; right: 14px;
+  display: flex; justify-content: space-between; align-items: center;
+  z-index: 4;
+}
+.cam-mode {
+  padding: 8px 14px; background: rgba(255,255,255,.12);
+  border-radius: 999px; font-size: 11px; font-weight: 700;
+  border: 1.5px solid rgba(255,255,255,.2);
+  backdrop-filter: blur(8px);
+  display: flex; gap: 6px; align-items: center;
+}
+.silhouette {
+  position: absolute; top: 44%; left: 50%; transform: translate(-50%,-50%);
+  width: 110px; height: 210px; z-index: 3;
+}
+.focus-box {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 78%; aspect-ratio: 4/6;
+  border: 2.5px dashed var(--k-blue-hi);
+  border-radius: 22px;
+  z-index: 2;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .55; } }
+.focus-box .cnr {
+  position: absolute; width: 22px; height: 22px;
+  border: 3px solid var(--k-blue-hi);
+}
+.focus-box .cnr.tl { top: -3px; left: -3px; border-right: 0; border-bottom: 0; border-radius: 22px 0 0 0; }
+.focus-box .cnr.tr { top: -3px; right: -3px; border-left: 0; border-bottom: 0; border-radius: 0 22px 0 0; }
+.focus-box .cnr.bl { bottom: -3px; left: -3px; border-right: 0; border-top: 0; border-radius: 0 0 0 22px; }
+.focus-box .cnr.br { bottom: -3px; right: -3px; border-left: 0; border-top: 0; border-radius: 0 0 22px 0; }
+
+.cam-bubble {
+  position: absolute; bottom: 148px; left: 50%; transform: translateX(-50%);
+  z-index: 4;
+}
+.bubble {
+  background: #fff; border: 2px solid var(--k-blue-outline);
+  border-radius: 14px; padding: 10px 14px;
+  font-weight: 700; font-size: 12px; color: var(--k-blue-depth);
+  position: relative;
+  box-shadow: 0 4px 0 rgba(15,93,127,.2);
+  white-space: nowrap;
+}
+.bubble::after {
+  content: ''; position: absolute; bottom: -8px; left: 24px;
+  width: 12px; height: 12px; background: #fff;
+  border-right: 2px solid var(--k-blue-outline);
+  border-bottom: 2px solid var(--k-blue-outline);
+  transform: rotate(45deg);
+}
+.bubble.warn { border-color: #b07600; color: #704b00; box-shadow: 0 4px 0 rgba(176,118,0,.2); }
+.bubble.warn::after { border-color: #b07600; }
+.bubble.ok { border-color: #00864a; color: #0a6339; box-shadow: 0 4px 0 rgba(0,134,74,.2); }
+.bubble.ok::after { border-color: #00864a; }
+
+.cam-bottom {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 16px 18px 26px;
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,.75));
+  z-index: 4;
+}
+.cam-status {
+  background: rgba(0,0,0,.6); backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(255,255,255,.14);
+  border-radius: 14px; padding: 10px 14px;
+  display: flex; gap: 10px; align-items: center;
+  margin-bottom: 10px;
+}
+.status-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--k-blue-hi);
+  box-shadow: 0 0 10px var(--k-blue-hi);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+.status-dot.ok { background: #2bd67b; box-shadow: 0 0 10px #2bd67b; }
+.status-dot.warn { background: var(--gold); box-shadow: 0 0 10px var(--gold); }
+.cam-status .label { font-size: 12px; font-weight: 800; color: #fff; }
+.cam-status .sub { font-size: 10px; opacity: .8; margin-top: 1px; }
+
+/* ------------------------------------------------------------------
+   08. 카운트다운
+------------------------------------------------------------------ */
+.ready-screen {
+  height: 100%; position: relative; overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(31,169,218,.4), transparent 70%),
+    linear-gradient(180deg, #0f1c2c, #071224);
+  color: #fff;
+}
+.count {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  font-family: var(--font-num);
+  font-size: 220px; font-weight: 800;
+  color: #fff;
+  text-shadow: 0 0 40px var(--k-blue-hi), 0 0 80px var(--k-blue);
+  line-height: 1;
+}
+.ready-label {
+  position: absolute; top: 26%; left: 0; right: 0;
+  text-align: center; letter-spacing: .3em;
+  font-family: var(--font-num); font-size: 14px;
+  color: var(--k-blue-hi);
+}
+.ready-foot {
+  position: absolute; bottom: 42px; left: 0; right: 0;
+  text-align: center; font-size: 12px; opacity: .8;
+}
+.ready-ring {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 280px; height: 280px;
+  border: 3px solid rgba(63,200,241,.35);
+  border-radius: 50%;
+}
+.ready-ring::after {
+  content: ''; position: absolute; inset: -30px;
+  border: 2px dashed rgba(31,169,218,.35);
+  border-radius: 50%;
+  animation: rot 10s linear infinite;
+}
+@keyframes rot { to { transform: rotate(360deg); } }
+
+/* ------------------------------------------------------------------
+   09. 초원 점프 인게임
+------------------------------------------------------------------ */
+.meadow-screen {
+  height: 100%; position: relative; overflow: hidden;
+  background:
+    linear-gradient(180deg, #bfe9ff 0%, #dcf3ff 45%, #a3d88b 55%, #6ec06a 100%);
+}
+.hill {
+  position: absolute; bottom: 42%; left: -40px; right: -40px; height: 42%;
+  background: radial-gradient(ellipse at 50% 120%, #70bf64 40%, transparent 70%);
+}
+.hill2 { position: absolute; bottom: 38%; left: -100px; width: 220px; height: 120px; background: #7ab56f; border-radius: 50% 50% 0 0 / 100% 100% 0 0; opacity: .8; }
+.hill3 { position: absolute; bottom: 38%; right: -60px; width: 200px; height: 100px; background: #5a9a4f; border-radius: 50% 50% 0 0 / 100% 100% 0 0; opacity: .65; }
+.meadow-3d {
+  position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
+  width: 180px; height: 260px;
+  display: grid; place-items: center;
+}
+.game-hud-top {
+  position: absolute; top: 48px; left: 14px; right: 14px;
+  display: flex; justify-content: space-between; gap: 8px;
+  z-index: 4;
+}
+.hud-chip {
+  background: rgba(255,255,255,.95);
+  border: 1.5px solid var(--k-blue-outline);
+  color: var(--k-blue-depth);
+  padding: 6px 12px; border-radius: 999px;
+  font-size: 11px; font-weight: 800;
+  display: flex; align-items: center; gap: 5px;
+  box-shadow: 0 2px 0 rgba(15,93,127,.2);
+}
+.counter-big {
+  position: absolute; top: 90px; left: 50%; transform: translateX(-50%);
+  background: #fff;
+  border: 2px solid var(--k-blue-outline);
+  border-radius: 20px; padding: 10px 20px;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 4px 0 rgba(15,93,127,.2);
+  z-index: 4;
+}
+.counter-big .n {
+  font-family: var(--font-num); font-size: 40px; color: var(--k-blue-depth);
+  font-weight: 800; line-height: 1;
+}
+.counter-big .l { font-size: 11px; color: var(--ink-sub); font-weight: 700; }
+.combo {
+  position: absolute; top: 174px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(180deg, #ffe082, #f5a800);
+  border: 1.5px solid #9c6800;
+  color: #fff;
+  padding: 5px 16px; border-radius: 999px;
+  font-family: var(--font-num); font-size: 13px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 -3px 0 #7e5300, 0 3px 0 rgba(126,83,0,.3);
+  text-shadow: 0 1px 0 rgba(0,0,0,.2);
+  z-index: 4;
+}
+.progress-goal {
+  position: absolute; bottom: 16px; left: 14px; right: 14px;
+  background: rgba(255,255,255,.96);
+  border: 1.5px solid var(--k-blue-outline);
+  border-radius: 16px; padding: 10px 14px;
+  z-index: 4;
+  box-shadow: 0 4px 0 rgba(15,93,127,.15);
+}
+.pg-top {
+  display: flex; justify-content: space-between;
+  font-size: 11px; font-weight: 700; color: var(--ink);
+  margin-bottom: 6px;
+}
+.pg-bar {
+  height: 12px; background: var(--panel-sub);
+  border: 1.5px solid var(--line);
+  border-radius: 999px; overflow: hidden;
+}
+.pg-bar i {
+  display: block; height: 100%; width: 64%;
+  background: linear-gradient(180deg, var(--k-blue-hi), var(--k-blue-mid));
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -2px 0 var(--k-blue-depth);
+}
+.cloud-f {
+  position: absolute;
+  width: 60px; height: 20px; background: #fff;
+  border-radius: 999px;
+}
+.cloud-f::before, .cloud-f::after { content: ''; position: absolute; background: #fff; border-radius: 50%; }
+.cloud-f::before { width: 26px; height: 26px; top: -10px; left: 10px; }
+.cloud-f::after { width: 22px; height: 22px; top: -8px; right: 12px; }
+
+/* ------------------------------------------------------------------
+   10. 레이싱 인게임
+------------------------------------------------------------------ */
+.race-screen {
+  height: 100%; position: relative; overflow: hidden;
+  background:
+    linear-gradient(180deg, #b9d7ff 0%, #5891e6 40%, #232a4c 42%, #0e1230 100%);
+}
+.race-ground {
+  position: absolute; bottom: 0; left: -20%; right: -20%; height: 50%;
+  background: linear-gradient(180deg, #3d2e6b 0%, #0f0d2a 100%);
+  transform: perspective(380px) rotateX(55deg);
+  transform-origin: bottom;
+}
+.race-lines {
+  position: absolute; bottom: 0; left: 50%; width: 60%;
+  height: 48%;
+  background:
+    repeating-linear-gradient(180deg, var(--gold) 0 14px, transparent 14px 32px);
+  mask: linear-gradient(180deg, transparent 0%, #000 20%, #000 100%);
+  transform: translateX(-50%) perspective(320px) rotateX(58deg);
+  transform-origin: bottom;
+  opacity: .85;
+}
+.race-3d {
+  position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
+  width: 220px; height: 220px;
+  display: grid; place-items: center; z-index: 3;
+}
+.race-hud-top {
+  position: absolute; top: 48px; left: 14px; right: 14px;
+  z-index: 5; color: #fff;
+  display: flex; justify-content: space-between; gap: 8px;
+}
+.speed-gauge {
+  position: absolute; bottom: 14px; right: 14px;
+  width: 110px; height: 110px; z-index: 5;
+}
+.speed-gauge svg { width: 100%; height: 100%; }
+.speed-txt {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  font-family: var(--font-num); color: #fff; text-align: center;
+}
+.speed-txt .n { font-size: 26px; font-weight: 800; line-height: 1; }
+.speed-txt .u { font-size: 10px; opacity: .8; }
+.rank-board {
+  position: absolute; top: 94px; left: 14px;
+  background: rgba(255,255,255,.96);
+  border: 1.5px solid var(--k-blue-outline);
+  border-radius: 14px; padding: 10px 12px;
+  color: var(--ink); font-size: 11px;
+  z-index: 5;
+  box-shadow: 0 3px 0 rgba(15,93,127,.2);
+}
+.rank-board .r { display: flex; align-items: center; gap: 6px; margin: 3px 0; }
+.rank-board .r.me { color: var(--k-blue-depth); font-weight: 800; }
+.rank-num { width: 16px; text-align: center; font-family: var(--font-num); }
+
+/* ------------------------------------------------------------------
+   11. 결과 화면
+------------------------------------------------------------------ */
+.result-screen {
+  height: 100%; position: relative; overflow: hidden;
+  background: linear-gradient(180deg, #071224 0%, #0f2e55 50%, var(--k-blue-depth) 100%);
+  color: #fff;
+}
+.result-screen::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(63,200,241,.35), transparent 30%),
+    radial-gradient(circle at 80% 20%, rgba(255,210,63,.3), transparent 30%);
+}
+.result-body {
+  position: relative; z-index: 2;
+  padding: 50px 20px 20px;
+  height: 100%;
+  display: flex; flex-direction: column;
+}
+.result-title {
+  text-align: center; font-family: var(--font-num);
+  font-size: 30px; font-weight: 800;
+  letter-spacing: .08em;
+  margin-bottom: 6px;
+}
+.result-sub { text-align: center; font-size: 12px; opacity: .85; margin-bottom: 16px; }
+.stars {
+  display: flex; justify-content: center; gap: 10px; margin: 8px 0 18px;
+}
+.stars img { width: 54px; height: 54px; animation: pop .6s ease both; filter: drop-shadow(0 4px 8px rgba(0,0,0,.3)); }
+.stars img:nth-child(1) { animation-delay: 0s; }
+.stars img:nth-child(2) { animation-delay: .2s; }
+.stars img:nth-child(3) { animation-delay: .4s; }
+.stars img.off { opacity: .28; filter: grayscale(1); }
+@keyframes pop {
+  0% { transform: scale(0); } 60% { transform: scale(1.25); } 100% { transform: scale(1); }
+}
+
+.result-stats {
+  background: rgba(255,255,255,.12);
+  backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(255,255,255,.22);
+  border-radius: 16px; padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.rs-row {
+  display: flex; justify-content: space-between;
+  padding: 6px 0; font-size: 13px;
+}
+.rs-row + .rs-row { border-top: 1px dashed rgba(255,255,255,.2); }
+.rs-row .v { font-family: var(--font-num); font-weight: 800; color: var(--gold); }
+
+.result-actions {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  margin-top: auto;
+}
+
+/* ------------------------------------------------------------------
+   12. 캐릭터 꾸미기 · 스토어
+------------------------------------------------------------------ */
+.store-screen { height: 100%; display: flex; flex-direction: column; background: #fff; }
+.store-head {
+  padding: 14px 18px; background: #fff;
+  border-bottom: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.cash {
+  font-family: var(--font-num);
+  background: linear-gradient(180deg, #ffe082, #f5a800);
+  border: 1.5px solid #9c6800;
+  padding: 6px 12px; border-radius: 999px;
+  font-size: 12px; color: #fff; font-weight: 800;
+  text-shadow: 0 1px 0 rgba(0,0,0,.2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 -3px 0 #7e5300;
+  display: inline-flex; gap: 6px; align-items: center;
+}
+.preview-3d {
+  height: 230px; position: relative;
+  background: radial-gradient(ellipse at 50% 70%, var(--k-blue-soft), #fff);
+  border-bottom: 1px solid var(--line);
+  display: grid; place-items: center;
+}
+.store-tabs {
+  display: flex; padding: 10px 14px 0; gap: 6px; overflow-x: auto;
+}
+.st-tab {
+  padding: 7px 14px 9px; border-radius: 10px;
+  font-size: 12px; font-weight: 800;
+  background: #fff; color: var(--ink-sub);
+  border: 1.5px solid var(--line-2);
+  white-space: nowrap; cursor: pointer;
+}
+.st-tab.active {
+  background: linear-gradient(180deg, var(--k-blue-hi), var(--k-blue-mid));
+  color: #fff;
+  border-color: var(--k-blue-outline);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.45), inset 0 -3px 0 var(--k-blue-depth);
+  text-shadow: 0 1px 0 rgba(0,0,0,.2);
+}
+.store-body { flex: 1; overflow: auto; padding: 14px; background: #fff; }
+.store-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
+}
+.goods {
+  background: #fff; border: 1.5px solid var(--line);
+  border-radius: 14px;
+  aspect-ratio: 1/1.2;
+  display: flex; flex-direction: column;
+  padding: 8px;
+}
+.goods.equipped { border-color: var(--k-blue); background: var(--k-blue-soft); }
+.goods .img {
+  flex: 1;
+  background: var(--panel-sub);
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  display: grid; place-items: center;
+  color: var(--k-blue-depth);
+}
+.goods .name {
+  font-size: 10px; font-weight: 700; margin-top: 6px;
+  text-align: center; color: var(--ink);
+}
+.goods .price {
+  font-family: var(--font-num);
+  font-size: 11px; color: var(--k-blue-depth);
+  text-align: center; margin-top: 2px;
+  font-weight: 700;
+}
+.goods .equipped-lbl {
+  font-size: 9px; color: var(--k-blue-depth); font-weight: 800;
+  text-align: center; margin-top: 2px;
+}
+
+/* ------------------------------------------------------------------
+   에셋 정보 박스
+------------------------------------------------------------------ */
+.asset-box {
+  background: #fff;
+  border: 2px solid var(--k-blue-outline);
+  color: var(--ink);
+  border-radius: 18px;
+  padding: 22px; margin-top: 14px;
+  box-shadow: 0 4px 0 rgba(15,93,127,.15);
+}
+.asset-box h3 { margin: 0 0 8px; font-size: 17px; font-weight: 800; color: var(--k-blue-depth); display: flex; gap: 8px; align-items: center; }
+.asset-box p { color: var(--ink-sub); font-size: 13px; margin: 0 0 16px; line-height: 1.6; }
+.asset-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+.asset-item {
+  background: var(--k-blue-soft);
+  border: 1.5px solid var(--k-blue-soft-2);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 12px;
+}
+.asset-item .k { font-weight: 800; font-size: 13px; margin-bottom: 3px; color: var(--ink); display: flex; gap: 6px; align-items: center; }
+.asset-item .v { color: var(--ink-sub); font-family: var(--font-num); font-size: 11px; }
+
+footer {
+  max-width: 1440px; margin: 40px auto 60px;
+  padding: 24px 28px;
+  color: var(--ink-mut); font-size: 12px;
+  text-align: center; line-height: 1.7;
+}
+
+.three-canvas { width: 100%; height: 100%; display: block; }
+.three-fallback {
+  width: 100%; height: 100%;
+  display: grid; place-items: center;
+  color: var(--ink-mut); font-size: 11px; text-align: center;
+  padding: 14px; line-height: 1.5;
+}
+
+/* 도장 매스코트 */
+.mascot-face {
+  width: 56px; height: 56px;
+}
+
+</style>
+</head>
+<body>
+
+<!-- ================= SVG 아이콘 스프라이트 ================= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11 L12 4 L21 11 V20 a1 1 0 0 1-1 1 h-4 v-6 h-6 v6 H4 a1 1 0 0 1-1-1 Z"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20 C4 15.6 7.6 13 12 13 S20 15.6 20 20"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20 C2.5 16.5 5.4 14.2 9 14.2 S15.5 16.5 15.5 20"/><path d="M15.5 10.2 a3 3 0 1 0 0-5.4"/><path d="M17 20 h4.5 C21.5 17.4 19.8 15.7 17 15.1"/></symbol>
+    <symbol id="i-game" viewBox="0 0 24 24"><rect x="2.5" y="7" width="19" height="11" rx="4"/><path d="M7 12 h4 M9 10 v4"/><circle cx="16" cy="11" r="1.2" fill="currentColor" stroke="none"/><circle cx="18" cy="14" r="1.2" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8 h14 l-1 12 a1 1 0 0 1 -1 1 H7 a1 1 0 0 1 -1 -1 Z"/><path d="M9 8 V6 a3 3 0 0 1 6 0 V8"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M7 4 h10 v5 a5 5 0 0 1 -10 0 Z"/><path d="M7 6 H4 v2 a3 3 0 0 0 3 3"/><path d="M17 6 h3 v2 a3 3 0 0 1 -3 3"/><path d="M10 14 h4 l-1 4 h2 v2 H9 v-2 h2 Z"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="15" rx="2.5"/><path d="M3.5 10 h17"/><path d="M8 3 v4 M16 3 v4"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7 v5 l3 2"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8 h4 l2 -2 h6 l2 2 h4 v11 a1 1 0 0 1 -1 1 H4 a1 1 0 0 1 -1 -1 Z"/><circle cx="12" cy="14" r="3.5"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 5 l12 7 -12 7 Z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6 L18 18 M18 6 L6 18"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5 L8 12 L15 19"/></symbol>
+    <symbol id="i-forward" viewBox="0 0 24 24"><path d="M9 5 l7 7 -7 7"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12 a7 7 0 0 0 -.2 -1.6 l2 -1.4 -2 -3.4 -2.4 .8 a7 7 0 0 0 -2.8 -1.6 L13 2 h-4 l-.6 2.8 a7 7 0 0 0 -2.8 1.6 L3.2 5.6 l-2 3.4 2 1.4 a7 7 0 0 0 0 3.2 l-2 1.4 2 3.4 2.4 -.8 a7 7 0 0 0 2.8 1.6 L9 22 h4 l.6 -2.8 a7 7 0 0 0 2.8 -1.6 l2.4 .8 2 -3.4 -2 -1.4 A7 7 0 0 0 19 12 Z"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16 V11 a6 6 0 0 1 12 0 v5 l2 2 H4 Z"/><path d="M10 20 a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20 l-4 -4"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12 L10 17 L19 7"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5 v14 M5 12 h14"/></symbol>
+    <symbol id="i-fire" viewBox="0 0 24 24"><path d="M12 3 c2 3 4 5 4 9 a4 4 0 0 1 -8 0 c0 -2 1 -3 2 -4 c-1 3 1 4 1 4 c0 -3 1 -6 1 -9 Z"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="5" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8 l7.6 -4.4 M8.2 13.2 l7.6 4.4"/></symbol>
+    <symbol id="i-building" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="17" rx="1.5"/><path d="M9 21 V17 h6 v4"/><path d="M8 8 h2 M14 8 h2 M8 12 h2 M14 12 h2"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20 H20"/><rect x="6" y="12" width="3" height="6"/><rect x="11" y="8" width="3" height="10"/><rect x="16" y="4" width="3" height="14"/></symbol>
+    <symbol id="i-medal" viewBox="0 0 24 24"><circle cx="12" cy="14" r="6"/><path d="M8 2 L10 10 M16 2 L14 10"/><path d="M10 14 l1.5 2 L16 12"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21 V4"/><path d="M5 4 h10 l-2 3 2 3 H5"/></symbol>
+    <symbol id="i-running" viewBox="0 0 24 24"><circle cx="15" cy="5" r="2"/><path d="M14 8 L10 12 L13 15 L11 21"/><path d="M13 15 L17 14 L19 17"/><path d="M10 12 L6 11 L4 14"/></symbol>
+    <symbol id="i-car" viewBox="0 0 24 24"><path d="M4 16 V12 L6 7 h12 l2 5 v4 Z"/><circle cx="8" cy="16" r="2"/><circle cx="16" cy="16" r="2"/><path d="M4 13 H20"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 3 L5 13 H11 L10 21 L19 10 H13 Z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11 V8 a4 4 0 0 1 8 0 v3"/></symbol>
+    <symbol id="i-lock-key" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11 V8 a4 4 0 0 1 8 0 v3"/><circle cx="12" cy="16" r="1" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6 3 h12 c.5 0 1 .5 1 1 v16 c0 .5 -.5 1 -1 1 H6 c-.5 0 -1 -.5 -1 -1 V4 c0 -.5 .5 -1 1 -1 Z"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7 a8 8 0 0 0 -14 -2"/><path d="M4 17 a8 8 0 0 0 14 2"/><path d="M20 3 V8 H15 M4 21 V16 H9"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20 S4 15 4 9 a4.5 4.5 0 0 1 8 -3 a4.5 4.5 0 0 1 8 3 c0 6 -8 11 -8 11 Z"/></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3 L14 10 L21 12 L14 14 L12 21 L10 14 L3 12 L10 10 Z"/></symbol>
+    <symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 13 V8"/><path d="M9 3 h6"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></symbol>
+    <symbol id="i-hat" viewBox="0 0 24 24"><path d="M3 18 h18"/><path d="M6 18 a6 6 0 0 1 12 0"/><path d="M8 13 V10 h8 v3"/></symbol>
+    <symbol id="i-glasses" viewBox="0 0 24 24"><circle cx="7" cy="13" r="3.5"/><circle cx="17" cy="13" r="3.5"/><path d="M10.5 13 h3"/></symbol>
+    <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M4 7 L9 4 a3 3 0 0 0 6 0 L20 7 L17 11 V20 H7 V11 Z"/></symbol>
+    <symbol id="i-crown" viewBox="0 0 24 24"><path d="M3 8 L7 14 L12 6 L17 14 L21 8 V18 H3 Z"/></symbol>
+    <symbol id="i-ribbon" viewBox="0 0 24 24"><path d="M4 6 L12 12 L20 6"/><path d="M4 18 L12 12 L20 18"/><circle cx="12" cy="12" r="2"/></symbol>
+    <symbol id="i-paw" viewBox="0 0 24 24"><circle cx="7" cy="8" r="2"/><circle cx="17" cy="8" r="2"/><circle cx="5" cy="14" r="1.6"/><circle cx="19" cy="14" r="1.6"/><path d="M12 12 c-3 0 -5 3 -5 5 a2 2 0 0 0 4 1 a2 2 0 0 0 4 -1 c0 -2 -2 -5 -5 -5 Z"/></symbol>
+    <symbol id="i-rabbit" viewBox="0 0 24 24"><path d="M7 10 C7 6 5 3 5 3 S4 7 5 10"/><path d="M17 10 C17 6 19 3 19 3 S20 7 19 10"/><circle cx="12" cy="15" r="6"/><circle cx="10" cy="14" r=".8" fill="currentColor" stroke="none"/><circle cx="14" cy="14" r=".8" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-tennis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3.5 9 C7 10 9 14 9 21"/><path d="M20.5 9 C17 10 15 14 15 21"/></symbol>
+    <symbol id="i-cape" viewBox="0 0 24 24"><path d="M5 4 L12 10 L19 4"/><path d="M5 4 L4 20 L12 16 L20 20 L19 4"/></symbol>
+    <symbol id="i-doboc" viewBox="0 0 24 24"><path d="M6 4 L12 8 L18 4 L20 9 L16 11 V20 H8 V11 L4 9 Z"/></symbol>
+  </defs>
+</svg>
+
+
+<nav class="doc-nav">
+  <div class="doc-nav-inner">
+    <div class="brand"><div class="brand-mark">JR</div> 줄넘기 체크</div>
+    <div class="doc-nav-links">
+      <a href="#s01">01 로그인</a>
+      <a href="#s02">02 초대코드</a>
+      <a href="#s03">03 도장 어드민</a>
+      <a href="#s04">04 회원 상세</a>
+      <a href="#s05">05 마이페이지</a>
+      <a href="#s06">06 게임 선택</a>
+      <a href="#s07">07 카메라 세팅</a>
+      <a href="#s08">08 카운트다운</a>
+      <a href="#s09">09 초원 점프</a>
+      <a href="#s10">10 레이싱</a>
+      <a href="#s11">11 결과</a>
+      <a href="#s12">12 스토어</a>
+    </div>
+    <div class="doc-nav-meta">
+      <span class="pill">v0.2</span>
+      <span>Kenney UI Pack</span>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <h1>줄넘기 체크 · <em>화면 레이아웃 v0.2</em></h1>
+  <p class="hero-sub">
+    Kenney UI Pack Blue/Default 에셋 톤에 맞춰 리디자인. 배경은 화이트, 버튼·체크·별·아바타 등은
+    에셋의 그라디언트 블루 톤과 "depth"(입체) 스타일을 그대로 살려 시각 언어를 통일했습니다.
+    게임 화면의 3D는 Mini Characters · Car Kit · Racing Kit GLB 모델을 Three.js로 로드합니다.
+  </p>
+  <div class="hero-tags">
+    <span class="tag accent">Kenney Blue · #1EA9DA</span>
+    <span class="tag">배경 · 화이트</span>
+    <span class="tag">Depth Button Style</span>
+    <span class="tag">SVG Icon Set</span>
+    <span class="tag">실결제 · SSO 제외</span>
+  </div>
+</header>
+
+<!-- ============================================================ -->
+<!-- SECTION 01 — 로그인 (SSO 제거)                                 -->
+<!-- ============================================================ -->
+<section class="section" id="s01">
+  <div class="section-head">
+    <span class="section-num">01–02</span>
+    <h2 class="section-title">로그인 · 초대코드</h2>
+    <span class="section-desc">도장 어드민 / 회원 2-track 진입점</span>
+  </div>
+  <div class="screens">
+
+    <!-- 01. 로그인 -->
+    <div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar">
+            <span>9:41</span>
+            <span class="right"><svg class="ic ic-sm"><use href="#i-refresh"/></svg> 5G</span>
+          </div>
+          <div class="phone-body">
+            <div class="login-screen">
+              <div class="login-logo">JR</div>
+              <div class="login-title">줄넘기 체크</div>
+              <div class="login-sub">카메라 하나로 시작하는 스마트 줄넘기</div>
+
+              <div class="login-tabs">
+                <div class="login-tab"><svg class="ic ic-sm" style="vertical-align:-3px"><use href="#i-building"/></svg> 도장</div>
+                <div class="login-tab active"><svg class="ic ic-sm" style="vertical-align:-3px"><use href="#i-user"/></svg> 회원</div>
+              </div>
+
+              <div class="login-input">
+                <svg class="ic"><use href="#i-user"/></svg>
+                <span>아이디 또는 전화번호</span>
+              </div>
+              <div class="login-input">
+                <svg class="ic"><use href="#i-lock-key"/></svg>
+                <span>비밀번호</span>
+              </div>
+
+              <div style="margin-top:12px">
+                <button class="kbtn lg block">로그인</button>
+              </div>
+
+              <div style="text-align:center; margin-top:14px; font-size:12px; color:var(--ink-sub)">
+                <span style="cursor:pointer; font-weight:600">아이디 찾기</span>
+                <span style="margin:0 10px; color:var(--ink-mut)">|</span>
+                <span style="cursor:pointer; font-weight:600">비밀번호 재설정</span>
+                <span style="margin:0 10px; color:var(--ink-mut)">|</span>
+                <span style="cursor:pointer; font-weight:700; color:var(--k-blue-depth)">가입하기</span>
+              </div>
+
+              <div class="login-foot">도장 가입은 초대코드가 필요해요</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="phone-caption"><strong>01 로그인</strong><br/>도장 / 회원 탭, SSO 제거로 간결</p>
+    </div>
+
+    <!-- 02. 초대코드 -->
+    <div id="s02">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar"><span>9:41</span><span class="right">5G</span></div>
+          <div class="phone-body">
+            <div class="invite-screen">
+              <div class="m-header" style="padding:0 0 14px;border:0;background:transparent">
+                <div class="m-icon-btn"><svg class="ic"><use href="#i-back"/></svg></div>
+                <div class="m-title">도장 코드 입력</div>
+                <div style="width:36px"></div>
+              </div>
+
+              <div class="invite-hero">
+                <svg class="ic ic-xl"><use href="#i-building"/></svg>
+              </div>
+
+              <div style="text-align:center; margin-top:14px">
+                <div style="font-size:16px;font-weight:800;margin:4px 0 4px">
+                  도장에서 받은 <span style="color:var(--k-blue-depth)">6자리 코드</span> 입력
+                </div>
+                <div style="font-size:11px;color:var(--ink-sub)">입력하면 자동으로 도장에 연결돼요</div>
+              </div>
+
+              <div class="code-input">
+                <div class="filled">K</div>
+                <div class="filled">R</div>
+                <div class="filled">1</div>
+                <div class="filled">7</div>
+                <div class="active">_</div>
+                <div></div>
+              </div>
+
+              <div style="margin-top:16px">
+                <button class="kbtn lg block">연결하기</button>
+                <div style="text-align:center;font-size:11px;color:var(--ink-mut);margin-top:12px">
+                  코드가 없으면 도장 관리자에게 문의해주세요
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="phone-caption"><strong>02 도장 초대코드</strong><br/>Kenney 스타일 6자리 OTP 입력</p>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SECTION 03–04 도장 어드민                                      -->
+<!-- ============================================================ -->
+<section class="section" id="s03">
+  <div class="section-head">
+    <span class="section-num">03–04</span>
+    <h2 class="section-title">도장 어드민 대시보드</h2>
+    <span class="section-desc">회원 관리 · 랭킹 · 세션 컨트롤</span>
+  </div>
+  <div class="screens">
+
+    <!-- 03 어드민 홈 -->
+    <div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar"><span>9:41</span><span class="right">5G</span></div>
+          <div class="phone-body">
+            <div class="admin-screen">
+              <div class="admin-head">
+                <div class="admin-head-row">
+                  <span style="display:flex;gap:6px;align-items:center;font-weight:700">
+                    <svg class="ic ic-sm" style="color:var(--k-blue-depth)"><use href="#i-building"/></svg>
+                    강남 태권도장
+                  </span>
+                  <div style="display:flex;gap:6px">
+                    <div class="m-icon-btn" style="width:32px;height:32px"><svg class="ic ic-sm"><use href="#i-bell"/></svg></div>
+                    <div class="m-icon-btn" style="width:32px;height:32px"><svg class="ic ic-sm"><use href="#i-settings"/></svg></div>
+                  </div>
+                </div>
+                <h3>안녕하세요, 관장님</h3>
+                <div class="kpi-row">
+                  <div class="kpi">
+                    <div class="kpi-num">42</div>
+                    <div class="kpi-lbl">오늘 출석</div>
+                  </div>
+                  <div class="kpi">
+                    <div class="kpi-num">1.2K</div>
+                    <div class="kpi-lbl">주간 횟수</div>
+                  </div>
+                  <div class="kpi">
+                    <div class="kpi-num">68</div>
+                    <div class="kpi-lbl">총 회원</div>
+                  </div>
+                </div>
+              </div>
+              <div class="admin-body">
+
+                <div class="sub-head">
+                  <h4><svg class="ic ic-sm" style="color:var(--k-blue-depth)"><use href="#i-trophy"/></svg> 이번 주 랭킹</h4>
+                  <span class="more-link">전체 보기</span>
+                </div>
+
+                <div class="member-row">
+                  <div class="rank-medal g">1</div>
+                  <div class="avatar gold">민</div>
+                  <div class="member-info">
+                    <div class="n">김민준 <span class="chip">초6</span></div>
+                    <div class="s"><svg class="ic ic-sm"><use href="#i-fire"/></svg> 6일 연속 출석</div>
+                  </div>
+                  <div class="member-meta">
+                    <div class="count">2,840</div>
+                    <div class="lbl">회</div>
+                  </div>
+                </div>
+
+                <div class="member-row">
+                  <div class="rank-medal s">2</div>
+                  <div class="avatar silver">서</div>
+                  <div class="member-info">
+                    <div class="n">이서연 <span class="chip">중1</span></div>
+                    <div class="s"><svg class="ic ic-sm"><use href="#i-zap"/></svg> 최고 콤보 124회</div>
+                  </div>
+                  <div class="member-meta">
+                    <div class="count">2,510</div>
+                    <div class="lbl">회</div>
+                  </div>
+                </div>
+
+                <div class="member-row">
+                  <div class="rank-medal b">3</div>
+                  <div class="avatar bronze">하</div>
+                  <div class="member-info">
+                    <div class="n">박하준 <span class="chip">초5</span></div>
+                    <div class="s"><svg class="ic ic-sm"><use href="#i-sparkle"/></svg> 오늘 380회 달성</div>
+                  </div>
+                  <div class="member-meta">
+                    <div class="count">2,030</div>
+                    <div class="lbl">회</div>
+                  </div>
+                </div>
+
+                <div class="sub-head" style="margin-top:18px">
+                  <h4><svg class="ic ic-sm" style="color:var(--k-blue-depth)"><use href="#i-game"/></svg> 게임 세션</h4>
+                </div>
+                <div class="card" style="display:flex;gap:10px;align-items:center">
+                  <div style="flex:1">
+                    <div style="font-size:13px;font-weight:800">대기 중인 세션 없음</div>
+                    <div style="font-size:11px;color:var(--ink-sub);margin-top:2px">세션 시작 시 모든 회원 알림 전송</div>
+                  </div>
+                  <button class="kbtn sm">시작</button>
+                </div>
+
+              </div>
+              <div class="tabbar">
+                <div class="tab-item active"><div class="tab-ico"><svg class="ic"><use href="#i-home"/></svg></div><div class="tab-lbl">홈</div></div>
+                <div class="tab-item"><div class="tab-ico"><svg class="ic"><use href="#i-users"/></svg></div><div class="tab-lbl">회원</div></div>
+                <div class="tab-item"><div class="tab-ico"><svg class="ic"><use href="#i-game"/></svg></div><div class="tab-lbl">게임</div></div>
+                <div class="tab-item"><div class="tab-ico"><svg class="ic"><use href="#i-chart"/></svg></div><div class="tab-lbl">통계</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="phone-caption"><strong>03 어드민 홈</strong><br/>KPI + 랭킹 + 세션 진입</p>
+    </div>
+
+    <!-- 04 회원 상세 -->
+    <div id="s04">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar"><span>9:41</span><span class="right">5G</span></div>
+          <div class="phone-body">
+            <div class="detail-screen">
+              <div class="m-header">
+                <div class="m-icon-btn"><svg class="ic"><use href="#i-back"/></svg></div>
+                <div class="m-title">회원 상세</div>
+                <div class="m-icon-btn"><svg class="ic"><use href="#i-more"/></svg></div>
+              </div>
+              <div class="detail-body">
+
+                <div class="profile-hero">
+                  <div style="display:flex;gap:12px;align-items:center">
+                    <div class="avatar gold" style="width:60px;height:60px;font-size:20px">민</div>
+                    <div style="flex:1">
+                      <div style="font-size:17px;font-weight:800">김민준</div>
+                      <div style="font-size:11px;opacity:.9;margin-top:2px">초등 6학년 · 강남 태권도장</div>
+                      <div style="margin-top:8px;display:flex;gap:5px">
+                        <span class="chip" style="background:rgba(255,255,255,.22);color:#fff;border-color:rgba(255,255,255,.3)"><svg class="ic ic-sm"><use href="#i-fire"/></svg> 6일 연속</span>
+                        <span class="chip" style="background:rgba(255,255,255,.22);color:#fff;border-color:rgba(255,255,255,.3)"><svg class="ic ic-sm"><use href="#i-sparkle"/></svg> Lv.12</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="dial">
+                  <div class="dial-col"><div class="n">2,840</div><div class="l">주간 횟수</div></div>
+                  <div class="dial-col"><div class="n">124</div><div class="l">최고 콤보</div></div>
+                  <div class="dial-col"><div class="n">18</div><div class="l">출석 일수</div></div>
+                </div>
+
+                <div class="sub-head">
+                  <h4><svg class="ic ic-sm" style="color:var(--k-blue-depth)"><use href="#i-calendar"/></svg> 4월 출석</h4>
+                  <span class="more-link">전체</span>
+                </div>
+                <div class="card" style="padding:10px">
+                  <div class="cal">
+                    <div class="dh">월</div><div class="dh">화</div><div class="dh">수</div>
+                    <div class="dh">목</div><div class="dh">금</div><div class="dh">토</div><div class="dh">일</div>
+                    <div class="dd check">1</div>
+                    <div class="dd">2</div>
+                    <div class="dd check">3</div>
+                    <div class="dd check">4</div>
+                    <div class="dd">5</div>
+                    <div class="dd check">6</div>
+                    <div class="dd check">7</div>
+                    <div class="dd check">8</div>
+                    <div class="dd check">9</div>
+                    <div class="dd check">10</div>
+                    <div class="dd">11</div>
+                    <div class="dd check">12</div>
+                    <div class="dd check">13</div>
+                    <div class="dd today">14</div>
+                  </div>
+                </div>
+
+                <div class="sub-head" style="margin-top:16px">
+                  <h4><svg class="ic ic-sm" style="color:var(--k-blue-depth)"><use href="#i-clock"/></svg> 최근 기록</h4>
+                </div>
+                <div class="log-item">
+                  <div class="log-ico"><svg class="ic"><use href="#i-car"/></svg></div>
+                  <div class="log-main">
+                    <div class="t">자동차 레이싱 · 2위</div>
+                    <div class="d">오늘 오후 3:22 · 3분 12초</div>
+                  </div>
+                  <div class="log-n">412회</div>
+                </div>
+                <div class="log-item">
+                  <div class="log-ico"><svg class="ic"><use href="#i-running"/></svg></div>
+                  <div class="log-main">
+                    <div class="t">초원 점프 · 목표 달성</div>
+                    <div class="d">오늘 오후 3:05 ·
+                      <img class="k-img k-arr" src="UI%20assets/UI%20Pack/PNG/Blue/Default/star.png" alt="★" style="width:10px;height:10px"/>
+                      <img class="k-img k-arr" src="UI%20assets/UI%20Pack/PNG/Blue/Default/star.png" alt="★" style="width:10px;height:10px"/>
+                      <img class="k-img k-arr" src="UI%20assets/UI%20Pack/PNG/Blue/Default/star.png" alt="★" style="width:10px;height:10px"/>
+                    </div>
+                  </div>
+                  <div class="log-n">300회</div>
+                </div>
+                <div class="log-item">
+                  <div class="log-ico"><svg class="ic"><use href="#i-car"/></svg></div>
+                  <div class="log-main">
+                    <div class="t">자동차 레이싱 · 1위</div>
+                    <div class="d">어제 오후 4:10 · 2분 48초</div>
+                  </div>
+                  <div class="log-n">486회</div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="phone-caption"><strong>04 회원 상세</strong><br/>출석 달력 · 기록 로그</p>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SECTION 05 마이페이지                                          -->
+<!-- ============================================================ -->
+<section class="section" id="s05">
+  <div class="section-head">
+    <span class="section-num">05</span>
+    <h2 class="section-title">회원 마이페이지</h2>
+    <span class="section-desc">주간 그래프 · 스탬프 달력 · 레벨</span>
+  </div>
+  <div class="screens">
+
+    <div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar"><span>9:41</span><span class="right">5G</span></div>
+          <div class="phone-body">
+            <div class="my-screen">
+              <div class="my-head">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div class="avatar" style="width:58px;height:58px;font-size:20px">민</div>
+                  <div style="flex:1">
+                    <div style="font-size:17px;font-weight:800">민준이</div>
+                    <div style="font-size:11px;color:var(--ink-sub);margin-top:2px">강남 태권도장 · Lv.12</div>
+                  </div>
+                  <div class="cash">
+                    <img class="k-img" src="UI%20assets/UI%20Pack/PNG/Blue/Default/star.png" alt="" style="width:14px;height:14px"/>
+                    2,450
+                  </div>
+                </div>
+                <div class="level-bar"><i></i></div>
+                <div class="level-row"><span>Lv.12</span><span>68 / 100 EXP</span></div>
+              </div>
+              <div class="my-body">
+
+                <div class="stat-card">
+                  <div class="sub-head" style="margin:0 0 4px">
+                    <h4><svg class="ic ic-sm" style="color:var(--k-blue-depth)"><use href="#i-chart"/></svg> 이번 주 줄넘기</h4>
+                    <span class="chip">+18%</span>
+                  </div>
+                  <div style="font-family:var(--font-num);font-size:26px;color:var(--k-blue-depth);font-weight:800;line-height:1">1,280회</div>
+                  <div class="bar-chart">
+                    <div class="bar" style="height:35%"><span>월</span></div>
+                    <div class="bar" style="height:60%"><span>화</span></div>
+                    <div class="bar" style="height:45%"><span>수</span></div>
+                    <div class="bar" style="height:70%"><span>목</span></div>
+                    <div class="bar" style="height:55%"><span>금</span></div>
+                    <div class="bar" style="height:85%"><span>토</span></div>
+                    <div class="bar today" style="height:92%"><span>일</span></div>
+                  </div>
+                </div>
+
+                <div class="stat-card">
+                  <div class="sub-head" style="margin:0 0 6px">
+                    <h4><svg class="ic ic-sm" style="color:var(--k-blue-depth)"><use href="#i-calendar"/></svg> 출석 달력</h4>
+                    <span class="chip"><svg class="ic ic-sm"><use href="#i-fire"/></svg> 6일</span>
+                  </div>
+                  <div class="cal">
+                    <div class="dh">월</div><div class="dh">화</div><div class="dh">수</div>
+                    <div class="dh">목</div><div class="dh">금</div><div class="dh">토</div><div class="dh">일</div>
+                    <div class="dd check">1</div>
+                    <div class="dd">2</div>
+                    <div class="dd check">3</div>
+                    <div class="dd check">4</div>
+                    <div class="dd">5</div>
+                    <div class="dd check">6</div>
+                    <div class="dd check">7</div>
+                    <div class="dd check">8</div>
+                    <div class="dd check">9</div>
+                    <div class="dd check">10</div>
+                    <div class="dd">11</div>
+                    <div class="dd check">12</div>
+                    <div class="dd check">13</div>
+                    <div class="dd today">14</div>
+                  </div>
+                </div>
+
+                <div class="stat-card">
+                  <div class="sub-head" style="margin:0 0 6px">
+                    <h4><svg class="ic ic-sm" style="color:var(--k-blue-depth)"><use href="#i-grid"/></svg> 내 아이템</h4>
+                    <span class="more-link">꾸미러 가기</span>
+                  </div>
+                  <div class="item-grid">
+                    <div class="item owned"><svg class="ic"><use href="#i-hat"/></svg></div>
+                    <div class="item owned"><svg class="ic"><use href="#i-glasses"/></svg></div>
+                    <div class="item owned"><svg class="ic"><use href="#i-shirt"/></svg></div>
+                    <div class="item locked"><svg class="ic"><use href="#i-lock"/></svg></div>
+                  </div>
+                </div>
+
+                <div class="stat-card">
+                  <div class="sub-head" style="margin:0 0 6px"><h4><svg class="ic ic-sm" style="color:var(--k-blue-depth)"><use href="#i-medal"/></svg> 배지</h4></div>
+                  <div style="display:flex;gap:8px">
+                    <div class="avatar gold" style="width:44px;height:44px"><svg class="ic"><use href="#i-trophy"/></svg></div>
+                    <div class="avatar" style="width:44px;height:44px"><svg class="ic"><use href="#i-running"/></svg></div>
+                    <div class="avatar bronze" style="width:44px;height:44px"><svg class="ic"><use href="#i-fire"/></svg></div>
+                    <div class="avatar" style="width:44px;height:44px;background:var(--panel-sub);border-color:var(--line);color:var(--ink-mut);opacity:.5;box-shadow:none"><svg class="ic"><use href="#i-lock"/></svg></div>
+                  </div>
+                </div>
+
+              </div>
+              <div class="tabbar">
+                <div class="tab-item active"><div class="tab-ico"><svg class="ic"><use href="#i-home"/></svg></div><div class="tab-lbl">홈</div></div>
+                <div class="tab-item"><div class="tab-ico"><svg class="ic"><use href="#i-game"/></svg></div><div class="tab-lbl">게임</div></div>
+                <div class="tab-item"><div class="tab-ico"><svg class="ic"><use href="#i-bag"/></svg></div><div class="tab-lbl">스토어</div></div>
+                <div class="tab-item"><div class="tab-ico"><svg class="ic"><use href="#i-user"/></svg></div><div class="tab-lbl">나</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="phone-caption"><strong>05 마이페이지</strong><br/>Kenney 블루 bar · 체크 달력 · 레벨바</p>
+    </div>
+
+    <!-- 디자인 스펙 정보 -->
+    <div style="align-self:stretch;display:flex;flex-direction:column;gap:14px">
+
+      <div class="card">
+        <div style="font-size:14px;font-weight:800;margin-bottom:10px;color:var(--k-blue-depth)">
+          <svg class="ic" style="color:var(--k-blue-depth);vertical-align:-3px"><use href="#i-sparkle"/></svg>
+          Kenney UI Pack 에셋 활용
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+          <div style="text-align:center">
+            <div style="height:60px;background:var(--panel-sub);border:1.5px solid var(--line);border-radius:10px;display:grid;place-items:center;padding:10px">
+              <img class="k-img" src="UI%20assets/UI%20Pack/PNG/Blue/Default/button_rectangle_depth_gradient.png" alt="btn" style="max-width:100%;max-height:100%"/>
+            </div>
+            <div style="font-size:10px;margin-top:4px;font-weight:700">버튼 에셋</div>
+          </div>
+          <div style="text-align:center">
+            <div style="height:60px;background:var(--panel-sub);border:1.5px solid var(--line);border-radius:10px;display:grid;place-items:center;padding:10px">
+              <img class="k-img" src="UI%20assets/UI%20Pack/PNG/Blue/Default/check_square_color_checkmark.png" alt="chk" style="max-height:100%"/>
+            </div>
+            <div style="font-size:10px;margin-top:4px;font-weight:700">체크박스</div>
+          </div>
+          <div style="text-align:center">
+            <div style="height:60px;background:var(--panel-sub);border:1.5px solid var(--line);border-radius:10px;display:grid;place-items:center;padding:10px">
+              <img class="k-img" src="UI%20assets/UI%20Pack/PNG/Blue/Default/star.png" alt="star" style="max-height:100%"/>
+            </div>
+            <div style="font-size:10px;margin-top:4px;font-weight:700">별</div>
+          </div>
+          <div style="text-align:center">
+            <div style="height:60px;background:var(--panel-sub);border:1.5px solid var(--line);border-radius:10px;display:grid;place-items:center;padding:10px">
+              <img class="k-img" src="UI%20assets/UI%20Pack/PNG/Blue/Default/arrow_decorative_e.png" alt="arr" style="max-height:100%"/>
+            </div>
+            <div style="font-size:10px;margin-top:4px;font-weight:700">화살표</div>
+          </div>
+          <div style="text-align:center">
+            <div style="height:60px;background:var(--panel-sub);border:1.5px solid var(--line);border-radius:10px;display:grid;place-items:center;padding:10px">
+              <img class="k-img" src="UI%20assets/UI%20Pack/PNG/Blue/Default/button_round_depth_gradient.png" alt="btn" style="max-height:100%"/>
+            </div>
+            <div style="font-size:10px;margin-top:4px;font-weight:700">라운드</div>
+          </div>
+          <div style="text-align:center">
+            <div style="height:60px;background:var(--panel-sub);border:1.5px solid var(--line);border-radius:10px;display:grid;place-items:center;padding:10px">
+              <img class="k-img" src="UI%20assets/UI%20Pack/PNG/Blue/Default/slide_horizontal_color.png" alt="sl" style="max-width:100%"/>
+            </div>
+            <div style="font-size:10px;margin-top:4px;font-weight:700">슬라이더</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="font-size:14px;font-weight:800;margin-bottom:10px;color:var(--k-blue-depth)">버튼 스타일 가이드</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="kbtn lg block">Primary · 메인 CTA</button>
+          <button class="kbtn block">Primary · 일반</button>
+          <button class="kbtn sm block">Primary · 스몰</button>
+          <button class="kbtn-outline kbtn block">Outline · 보조</button>
+          <div style="display:flex;gap:8px">
+            <button class="kbtn-round"><svg class="ic"><use href="#i-back"/></svg></button>
+            <button class="kbtn-round"><svg class="ic"><use href="#i-play"/></svg></button>
+            <button class="kbtn-round"><svg class="ic"><use href="#i-forward"/></svg></button>
+            <button class="kbtn-round"><svg class="ic"><use href="#i-plus"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="font-size:14px;font-weight:800;margin-bottom:10px;color:var(--k-blue-depth)">컬러 · 타이포</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
+          <div>
+            <div style="aspect-ratio:1;background:var(--k-blue-hi);border-radius:10px;border:1.5px solid var(--k-blue-outline)"></div>
+            <div style="font-size:9px;margin-top:4px;font-family:var(--font-num)">#3FC8F1</div>
+          </div>
+          <div>
+            <div style="aspect-ratio:1;background:var(--k-blue);border-radius:10px;border:1.5px solid var(--k-blue-outline)"></div>
+            <div style="font-size:9px;margin-top:4px;font-family:var(--font-num)">#1EA9DA</div>
+          </div>
+          <div>
+            <div style="aspect-ratio:1;background:var(--k-blue-depth);border-radius:10px;border:1.5px solid var(--k-blue-outline)"></div>
+            <div style="font-size:9px;margin-top:4px;font-family:var(--font-num)">#14759D</div>
+          </div>
+          <div>
+            <div style="aspect-ratio:1;background:var(--k-blue-outline);border-radius:10px;border:1.5px solid var(--k-blue-outline)"></div>
+            <div style="font-size:9px;margin-top:4px;font-family:var(--font-num)">#0F5D7F</div>
+          </div>
+        </div>
+        <div style="font-family:'Pretendard';font-size:22px;font-weight:800;line-height:1.2">한글 · Pretendard</div>
+        <div style="font-size:11px;color:var(--ink-sub);margin-bottom:8px">본문 · 버튼 · 레이블</div>
+        <div style="font-family:var(--font-num);font-size:22px;color:var(--k-blue-depth);line-height:1.2">KENNEY FUTURE 2,840</div>
+        <div style="font-size:11px;color:var(--ink-sub)">숫자 · 카운터 · 게임 HUD 전용</div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SECTION 06 게임 선택                                           -->
+<!-- ============================================================ -->
+<section class="section" id="s06">
+  <div class="section-head">
+    <span class="section-num">06</span>
+    <h2 class="section-title">게임 모드 선택</h2>
+    <span class="section-desc">초원 점프 / 자동차 레이싱</span>
+  </div>
+  <div class="screens">
+
+    <div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar"><span>9:41</span><span class="right">5G</span></div>
+          <div class="phone-body">
+            <div class="pick-screen">
+              <div class="m-header">
+                <div class="m-icon-btn"><svg class="ic"><use href="#i-back"/></svg></div>
+                <div class="m-title">게임 선택</div>
+                <div class="cash">
+                  <img class="k-img" src="UI%20assets/UI%20Pack/PNG/Blue/Default/star.png" alt="" style="width:14px;height:14px"/>
+                  2,450
+                </div>
+              </div>
+              <div class="pick-body">
+                <div style="font-size:13px;color:var(--ink-sub);margin-bottom:14px">
+                  오늘 어떤 모드로 뛰어볼까?
+                </div>
+
+                <div class="game-card meadow">
+                  <div class="bg">
+                    <div class="sun"></div>
+                    <div class="cloud c1"></div>
+                    <div class="cloud c2"></div>
+                    <div class="char-sil">
+                      <svg viewBox="0 0 72 96" width="72" height="96">
+                        <circle cx="36" cy="22" r="16" fill="#ffdec0"/>
+                        <rect x="24" y="38" width="24" height="30" rx="6" fill="#1ea9da" stroke="#0f5d7f" stroke-width="1.5"/>
+                        <rect x="22" y="68" width="10" height="20" rx="4" fill="#1a2442"/>
+                        <rect x="40" y="68" width="10" height="20" rx="4" fill="#1a2442"/>
+                        <circle cx="32" cy="20" r="2" fill="#111"/>
+                        <circle cx="40" cy="20" r="2" fill="#111"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="foreground">
+                    <span class="gc-badge"><svg class="ic ic-sm"><use href="#i-running"/></svg> CLASSIC</span>
+                    <div>
+                      <h4>초원 점프</h4>
+                      <p>목표 횟수까지 캐릭터와 함께 뛰자</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="game-card racing">
+                  <div class="bg">
+                    <div class="road-lines"></div>
+                    <div class="car-sil"></div>
+                  </div>
+                  <div class="foreground">
+                    <span class="gc-badge"><svg class="ic ic-sm"><use href="#i-zap"/></svg> NEW</span>
+                    <div>
+                      <h4>자동차 레이싱</h4>
+                      <p>뛸수록 빨라지는 속도감 있는 레이스</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card" style="display:flex;gap:10px;align-items:center;margin-top:4px;background:var(--k-blue-soft);border-color:var(--k-blue-soft-2)">
+                  <div style="width:36px;height:36px;background:linear-gradient(180deg,var(--k-blue-hi),var(--k-blue-mid));border:1.5px solid var(--k-blue-outline);border-radius:10px;display:grid;place-items:center;color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -3px 0 var(--k-blue-depth)">
+                    <svg class="ic"><use href="#i-trophy"/></svg>
+                  </div>
+                  <div style="flex:1">
+                    <div style="font-size:12px;font-weight:800">도장 대회 진행 중</div>
+                    <div style="font-size:10px;color:var(--ink-sub);margin-top:2px">4월 30일까지 · 1등 500캐시</div>
+                  </div>
+                  <span class="chip">LIVE</span>
+                </div>
+              </div>
+
+              <div class="tabbar">
+                <div class="tab-item"><div class="tab-ico"><svg class="ic"><use href="#i-home"/></svg></div><div class="tab-lbl">홈</div></div>
+                <div class="tab-item active"><div class="tab-ico"><svg class="ic"><use href="#i-game"/></svg></div><div class="tab-lbl">게임</div></div>
+                <div class="tab-item"><div class="tab-ico"><svg class="ic"><use href="#i-bag"/></svg></div><div class="tab-lbl">스토어</div></div>
+                <div class="tab-item"><div class="tab-ico"><svg class="ic"><use href="#i-user"/></svg></div><div class="tab-lbl">나</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="phone-caption"><strong>06 게임 선택</strong><br/>일러스트 카드 + 대회 배너</p>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SECTION 07–08 카메라 · 카운트다운                             -->
+<!-- ============================================================ -->
+<section class="section" id="s07">
+  <div class="section-head">
+    <span class="section-num">07–08</span>
+    <h2 class="section-title">카메라 세팅 · Ready</h2>
+    <span class="section-desc">거리 감지 안내 + 3초 카운트다운</span>
+  </div>
+  <div class="screens">
+
+    <!-- 07a 너무 가까움 -->
+    <div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar" style="color:#fff"><span>9:41</span><span class="right">5G</span></div>
+          <div class="phone-body">
+            <div class="cam-screen">
+              <div class="cam-top">
+                <button class="kbtn-round sm" style="background:rgba(0,0,0,.4);border-color:rgba(255,255,255,.3);box-shadow:none">
+                  <svg class="ic ic-sm"><use href="#i-close"/></svg>
+                </button>
+                <div class="cam-mode"><svg class="ic ic-sm"><use href="#i-camera"/></svg> 거리 감지 중</div>
+              </div>
+              <div class="focus-box">
+                <span class="cnr tl"></span><span class="cnr tr"></span>
+                <span class="cnr bl"></span><span class="cnr br"></span>
+              </div>
+              <div class="silhouette">
+                <svg viewBox="0 0 110 210">
+                  <circle cx="55" cy="32" r="26" fill="rgba(63,200,241,.25)" stroke="var(--k-blue-hi)" stroke-width="2"/>
+                  <rect x="35" y="58" width="40" height="70" rx="12" fill="rgba(63,200,241,.2)" stroke="var(--k-blue-hi)" stroke-width="2"/>
+                  <line x1="42" y1="130" x2="40" y2="200" stroke="var(--k-blue-hi)" stroke-width="4" stroke-linecap="round"/>
+                  <line x1="68" y1="130" x2="70" y2="200" stroke="var(--k-blue-hi)" stroke-width="4" stroke-linecap="round"/>
+                  <circle cx="45" cy="28" r="2.5" fill="#fff"/>
+                  <circle cx="65" cy="28" r="2.5" fill="#fff"/>
+                </svg>
+              </div>
+
+              <div class="cam-bubble">
+                <div class="bubble warn">조금 뒤로 물러서!<br/>한 발 정도 더 멀어져도 돼</div>
+              </div>
+
+              <div class="cam-bottom">
+                <div class="cam-status">
+                  <div class="status-dot warn"></div>
+                  <div>
+                    <div class="label">너무 가까워요</div>
+                    <div class="sub">전신이 화면에 들어와야 감지 가능</div>
+                  </div>
+                </div>
+                <button class="kbtn lg block" style="opacity:.5" disabled>준비되면 자동 시작돼요</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="phone-caption"><strong>07a 너무 가까움</strong><br/>노란 경고 · 귀여운 말풍선</p>
+    </div>
+
+    <!-- 07b 적정 거리 -->
+    <div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar" style="color:#fff"><span>9:41</span><span class="right">5G</span></div>
+          <div class="phone-body">
+            <div class="cam-screen">
+              <div class="cam-top">
+                <button class="kbtn-round sm" style="background:rgba(0,0,0,.4);border-color:rgba(255,255,255,.3);box-shadow:none">
+                  <svg class="ic ic-sm"><use href="#i-close"/></svg>
+                </button>
+                <div class="cam-mode" style="background:rgba(43,214,123,.3);border-color:rgba(43,214,123,.5)">
+                  <svg class="ic ic-sm"><use href="#i-check"/></svg> 감지 완료
+                </div>
+              </div>
+              <div class="focus-box" style="border-color:#2bd67b">
+                <span class="cnr tl" style="border-color:#2bd67b"></span>
+                <span class="cnr tr" style="border-color:#2bd67b"></span>
+                <span class="cnr bl" style="border-color:#2bd67b"></span>
+                <span class="cnr br" style="border-color:#2bd67b"></span>
+              </div>
+              <div class="silhouette">
+                <svg viewBox="0 0 110 210">
+                  <circle cx="55" cy="42" r="13" fill="rgba(43,214,123,.2)" stroke="#2bd67b" stroke-width="2"/>
+                  <line x1="55" y1="55" x2="55" y2="110" stroke="#2bd67b" stroke-width="3"/>
+                  <line x1="55" y1="70" x2="35" y2="90" stroke="#2bd67b" stroke-width="3" stroke-linecap="round"/>
+                  <line x1="55" y1="70" x2="75" y2="90" stroke="#2bd67b" stroke-width="3" stroke-linecap="round"/>
+                  <line x1="55" y1="110" x2="42" y2="160" stroke="#2bd67b" stroke-width="3" stroke-linecap="round"/>
+                  <line x1="55" y1="110" x2="68" y2="160" stroke="#2bd67b" stroke-width="3" stroke-linecap="round"/>
+                  <circle cx="55" cy="42" r="3" fill="#2bd67b"/>
+                  <circle cx="55" cy="70" r="3" fill="#2bd67b"/>
+                  <circle cx="35" cy="90" r="3" fill="#2bd67b"/>
+                  <circle cx="75" cy="90" r="3" fill="#2bd67b"/>
+                  <circle cx="55" cy="110" r="3" fill="#2bd67b"/>
+                  <circle cx="42" cy="160" r="3" fill="#2bd67b"/>
+                  <circle cx="68" cy="160" r="3" fill="#2bd67b"/>
+                </svg>
+              </div>
+
+              <div class="cam-bubble">
+                <div class="bubble ok">
+                  <img class="k-img" src="UI%20assets/UI%20Pack/PNG/Blue/Default/star.png" alt="" style="width:14px;height:14px;vertical-align:-3px"/>
+                  완벽해! 이제 시작하자
+                </div>
+              </div>
+
+              <div class="cam-bottom">
+                <div class="cam-status">
+                  <div class="status-dot ok"></div>
+                  <div>
+                    <div class="label">감지 완료 · 포즈 추적 중</div>
+                    <div class="sub">신뢰도 96% · 전신 프레임 안</div>
+                  </div>
+                </div>
+                <button class="kbtn lg block">시작하기</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="phone-caption"><strong>07b 적정 거리</strong><br/>녹색 OK · 포즈 스켈레톤 감지</p>
+    </div>
+
+    <!-- 08 카운트다운 -->
+    <div id="s08">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar" style="color:#fff;opacity:.7"><span>9:41</span><span class="right">5G</span></div>
+          <div class="phone-body">
+            <div class="ready-screen">
+              <div class="ready-label">READY · GET · SET</div>
+              <div class="ready-ring"></div>
+              <div class="count">3</div>
+              <div class="ready-foot">곧 시작해요 · 점프 준비!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="phone-caption"><strong>08 카운트다운</strong><br/>3→2→1 숫자 애니메이션</p>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SECTION 09 초원 점프                                           -->
+<!-- ============================================================ -->
+<section class="section" id="s09">
+  <div class="section-head">
+    <span class="section-num">09</span>
+    <h2 class="section-title">게임 1 · 초원 점프</h2>
+    <span class="section-desc">Mini Characters 1 3D 로드</span>
+  </div>
+  <div class="screens">
+
+    <div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar" style="color:#fff"><span>9:41</span><span class="right">5G</span></div>
+          <div class="phone-body">
+            <div class="meadow-screen">
+              <div class="hill"></div>
+              <div class="hill2"></div>
+              <div class="hill3"></div>
+              <div class="cloud-f" style="top:60px;left:20px"></div>
+              <div class="cloud-f" style="top:90px;right:30px;transform:scale(.75)"></div>
+              <div class="cloud-f" style="top:130px;left:80px;transform:scale(.6);opacity:.7"></div>
+
+              <div class="game-hud-top">
+                <div class="hud-chip"><svg class="ic ic-sm"><use href="#i-clock"/></svg> 01:24</div>
+                <div class="hud-chip"><svg class="ic ic-sm"><use href="#i-running"/></svg> 초원 점프</div>
+                <div class="hud-chip"><svg class="ic ic-sm"><use href="#i-fire"/></svg> 18</div>
+              </div>
+
+              <div class="counter-big">
+                <div class="n">186</div>
+                <div class="l">/ 300회<br/>목표</div>
+              </div>
+
+              <div class="combo">+18 COMBO!</div>
+
+              <div class="meadow-3d" data-three="character">
+                <div class="three-fallback">
+                  <div>
+                    <svg class="ic ic-xl" style="color:var(--k-blue-depth);margin-bottom:6px"><use href="#i-running"/></svg>
+                    <div><strong>Mini Characters</strong><br/>character-female-a.glb</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="progress-goal">
+                <div class="pg-top">
+                  <span>목표까지</span>
+                  <span>186 / 300</span>
+                </div>
+                <div class="pg-bar"><i></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="phone-caption"><strong>09 초원 점프 인게임</strong><br/>실시간 카운터 · 콤보 · 목표바</p>
+    </div>
+
+    <div style="align-self:stretch;display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div style="font-size:14px;font-weight:800;color:var(--k-blue-depth);margin-bottom:6px">게임 로직</div>
+        <ul style="margin:0;padding-left:18px;font-size:12px;line-height:1.8;color:var(--ink-sub)">
+          <li>MediaPipe Pose의 발목·무릎 Y좌표 변화량으로 점프 판별</li>
+          <li>연속 점프 시 콤보 x1 → x2 → x3 증가, 놓치면 리셋</li>
+          <li>배경은 점프 주기에 맞춰 살짝 스크롤 (시차 효과)</li>
+          <li>목표 횟수 도달 또는 시간 제한(기본 2분) 종료</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div style="font-size:14px;font-weight:800;color:var(--k-blue-depth);margin-bottom:6px">사용 에셋</div>
+        <div style="font-size:12px;line-height:1.7;color:var(--ink-sub)">
+          <div>· <strong>캐릭터</strong> — Mini Characters 1 / character-female-a.glb</div>
+          <div>· <strong>점프 애니</strong> — Animated Characters 2 / jump.fbx</div>
+          <div>· <strong>초원/구름</strong> — CSS + SVG 시차</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SECTION 10 자동차 레이싱                                      -->
+<!-- ============================================================ -->
+<section class="section" id="s10">
+  <div class="section-head">
+    <span class="section-num">10</span>
+    <h2 class="section-title">게임 2 · 자동차 레이싱</h2>
+    <span class="section-desc">Car Kit 3D 로드 (race.glb)</span>
+  </div>
+  <div class="screens">
+
+    <div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar" style="color:#fff"><span>9:41</span><span class="right">5G</span></div>
+          <div class="phone-body">
+            <div class="race-screen">
+              <div class="race-ground"></div>
+              <div class="race-lines"></div>
+
+              <div class="race-hud-top">
+                <div class="hud-chip"><svg class="ic ic-sm"><use href="#i-clock"/></svg> 01:24</div>
+                <div class="hud-chip"><svg class="ic ic-sm"><use href="#i-flag"/></svg> LAP 2/3</div>
+                <div class="hud-chip"><svg class="ic ic-sm"><use href="#i-fire"/></svg> 412</div>
+              </div>
+
+              <div class="rank-board">
+                <div style="font-size:10px;color:var(--ink-sub);margin-bottom:4px;font-weight:800">RANK</div>
+                <div class="r me"><span class="rank-num">1</span> 나 <span style="margin-left:auto;font-family:var(--font-num)">86m</span></div>
+                <div class="r"><span class="rank-num">2</span> AI-Bot <span style="margin-left:auto;font-family:var(--font-num)">78m</span></div>
+                <div class="r"><span class="rank-num">3</span> AI-Bot <span style="margin-left:auto;font-family:var(--font-num)">61m</span></div>
+              </div>
+
+              <div class="race-3d" data-three="car">
+                <div class="three-fallback" style="color:rgba(255,255,255,.75)">
+                  <div>
+                    <svg class="ic ic-xl" style="color:#fff;margin-bottom:6px"><use href="#i-car"/></svg>
+                    <div><strong>Car Kit</strong><br/>race.glb</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="speed-gauge">
+                <svg viewBox="0 0 120 120">
+                  <defs>
+                    <linearGradient id="spg" x1="0" x2="1">
+                      <stop offset="0" stop-color="var(--k-blue-hi)"/>
+                      <stop offset="1" stop-color="#ffd23f"/>
+                    </linearGradient>
+                  </defs>
+                  <circle cx="60" cy="60" r="50" fill="rgba(0,0,0,.45)"/>
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="8"/>
+                  <circle cx="60" cy="60" r="50" fill="none"
+                    stroke="url(#spg)" stroke-width="8" stroke-linecap="round"
+                    stroke-dasharray="314" stroke-dashoffset="90"
+                    transform="rotate(-90 60 60)"/>
+                </svg>
+                <div class="speed-txt"><div class="n">142</div><div class="u">KM/H</div></div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="phone-caption"><strong>10 레이싱 인게임</strong><br/>속도 게이지 · 랭크 · 3D 차량</p>
+    </div>
+
+    <div style="align-self:stretch;display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div style="font-size:14px;font-weight:800;color:var(--k-blue-depth);margin-bottom:6px">게임 로직</div>
+        <ul style="margin:0;padding-left:18px;font-size:12px;line-height:1.8;color:var(--ink-sub)">
+          <li>점프 Z축 이동량 → 속도 ∆v, 속도 감쇠 k 초당</li>
+          <li>점프 없이 1초 유지 시 자동 감속</li>
+          <li>AI 봇은 고정 속도 커브, 추월 시 점수</li>
+          <li>3랩 또는 시간 만료 시 종료</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div style="font-size:14px;font-weight:800;color:var(--k-blue-depth);margin-bottom:6px">사용 에셋</div>
+        <div style="font-size:12px;line-height:1.7;color:var(--ink-sub)">
+          <div>· <strong>주행 차량</strong> — Car Kit / race.glb</div>
+          <div>· <strong>AI 봇</strong> — kart-oobi · sedan-sports · race-future</div>
+          <div>· <strong>도로</strong> — Racing Kit / roadStraight.glb</div>
+          <div>· <strong>배너/깃발</strong> — bannerTowerRed · flagCheckers</div>
+          <div>· <strong>관중석</strong> — grandStand · tent</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SECTION 11 결과                                                -->
+<!-- ============================================================ -->
+<section class="section" id="s11">
+  <div class="section-head">
+    <span class="section-num">11</span>
+    <h2 class="section-title">결과 화면</h2>
+    <span class="section-desc">Kenney 별 · 공유 · 재도전</span>
+  </div>
+  <div class="screens">
+
+    <div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar" style="color:#fff"><span>9:41</span><span class="right">5G</span></div>
+          <div class="phone-body">
+            <div class="result-screen">
+              <div class="result-body">
+                <div class="result-title">GAME CLEAR!</div>
+                <div class="result-sub">목표 달성 · 신기록까지 12회</div>
+
+                <div class="stars">
+                  <img src="UI%20assets/UI%20Pack/PNG/Blue/Default/star.png" alt="★"/>
+                  <img src="UI%20assets/UI%20Pack/PNG/Blue/Default/star.png" alt="★"/>
+                  <img src="UI%20assets/UI%20Pack/PNG/Blue/Default/star_outline.png" alt="☆" class="off"/>
+                </div>
+
+                <div class="result-stats">
+                  <div class="rs-row"><span>총 점프 횟수</span><span class="v">312회</span></div>
+                  <div class="rs-row"><span>최고 콤보</span><span class="v">× 48</span></div>
+                  <div class="rs-row"><span>플레이 시간</span><span class="v">2:14</span></div>
+                  <div class="rs-row"><span>획득 EXP</span><span class="v" style="color:var(--k-blue-hi)">+ 82</span></div>
+                  <div class="rs-row"><span>획득 캐시</span><span class="v">+ 50</span></div>
+                </div>
+
+                <div class="card" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.24);color:#fff;padding:12px;margin-bottom:14px">
+                  <div style="display:flex;gap:10px;align-items:center">
+                    <div class="avatar gold" style="width:40px;height:40px"><svg class="ic"><use href="#i-trophy"/></svg></div>
+                    <div style="flex:1">
+                      <div style="font-size:13px;font-weight:800">새 배지 획득!</div>
+                      <div style="font-size:10px;opacity:.85;margin-top:2px">300 연속 점프 마스터</div>
+                    </div>
+                    <span class="chip gold">NEW</span>
+                  </div>
+                </div>
+
+                <div class="result-actions">
+                  <button class="kbtn-outline kbtn" style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff;box-shadow:inset 0 1.5px 0 rgba(255,255,255,.3),inset 0 -3px 0 rgba(0,0,0,.15);text-shadow:0 1px 0 rgba(0,0,0,.2)">
+                    <svg class="ic ic-sm"><use href="#i-share"/></svg> 공유
+                  </button>
+                  <button class="kbtn">
+                    <svg class="ic ic-sm"><use href="#i-refresh"/></svg> 다시 하기
+                  </button>
+                </div>
+                <div style="text-align:center;font-size:11px;opacity:.7;margin-top:12px;cursor:pointer">홈으로 돌아가기</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="phone-caption"><strong>11 결과 화면</strong><br/>Kenney 별 에셋 · 배지 · 재도전</p>
+    </div>
+
+    <div style="align-self:stretch;display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div style="font-size:14px;font-weight:800;color:var(--k-blue-depth);margin-bottom:10px">별 평가 기준</div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:12px;align-items:center">
+          <div style="display:flex;gap:2px">
+            <img class="k-img k-star" src="UI%20assets/UI%20Pack/PNG/Blue/Default/star.png" alt="" style="width:18px;height:18px"/>
+          </div>
+          <div>목표 달성</div>
+          <div style="display:flex;gap:2px">
+            <img class="k-img k-star" src="UI%20assets/UI%20Pack/PNG/Blue/Default/star.png" alt="" style="width:18px;height:18px"/>
+            <img class="k-img k-star" src="UI%20assets/UI%20Pack/PNG/Blue/Default/star.png" alt="" style="width:18px;height:18px"/>
+          </div>
+          <div>목표 + 시간 내 완료</div>
+          <div style="display:flex;gap:2px">
+            <img class="k-img k-star" src="UI%20assets/UI%20Pack/PNG/Blue/Default/star.png" alt="" style="width:18px;height:18px"/>
+            <img class="k-img k-star" src="UI%20assets/UI%20Pack/PNG/Blue/Default/star.png" alt="" style="width:18px;height:18px"/>
+            <img class="k-img k-star" src="UI%20assets/UI%20Pack/PNG/Blue/Default/star.png" alt="" style="width:18px;height:18px"/>
+          </div>
+          <div>목표 + 시간 + 50콤보 이상</div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:14px;font-weight:800;color:var(--k-blue-depth);margin-bottom:6px">공유 포맷</div>
+        <div style="background:var(--panel-sub);border-radius:12px;padding:12px;font-size:11px;line-height:1.6;color:var(--ink-sub);font-family:monospace;border:1px solid var(--line)">
+          [이미지] 결과 카드 · 로고 · 캐릭터<br/>
+          [텍스트] 나 오늘 줄넘기 312회 했어!<br/>
+          [링크] 줄넘기 체크에서 도전하기
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- SECTION 12 스토어                                              -->
+<!-- ============================================================ -->
+<section class="section" id="s12">
+  <div class="section-head">
+    <span class="section-num">12</span>
+    <h2 class="section-title">캐릭터 꾸미기 · 스토어</h2>
+    <span class="section-desc">보유 착용 + 캐시샵 UI</span>
+  </div>
+  <div class="screens">
+
+    <div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="status-bar"><span>9:41</span><span class="right">5G</span></div>
+          <div class="phone-body">
+            <div class="store-screen">
+              <div class="store-head">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div class="m-icon-btn"><svg class="ic"><use href="#i-back"/></svg></div>
+                  <div class="m-title">캐릭터 꾸미기</div>
+                </div>
+                <div class="cash">
+                  <img class="k-img" src="UI%20assets/UI%20Pack/PNG/Blue/Default/star.png" alt="" style="width:14px;height:14px"/>
+                  2,450
+                </div>
+              </div>
+
+              <div class="preview-3d" data-three="character-preview">
+                <div class="three-fallback">
+                  <div>
+                    <svg class="ic ic-xl" style="color:var(--k-blue-depth);margin-bottom:6px"><use href="#i-user"/></svg>
+                    <div><strong>Mini Characters</strong> · 3D 미리보기</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="store-tabs">
+                <div class="st-tab active">모두</div>
+                <div class="st-tab">모자</div>
+                <div class="st-tab">안경</div>
+                <div class="st-tab">의상</div>
+                <div class="st-tab">소품</div>
+              </div>
+
+              <div class="store-body">
+                <div class="store-grid">
+                  <div class="goods equipped">
+                    <div class="img"><svg class="ic ic-lg"><use href="#i-hat"/></svg></div>
+                    <div class="name">헤드기어</div>
+                    <div class="equipped-lbl">착용 중</div>
+                  </div>
+                  <div class="goods">
+                    <div class="img"><svg class="ic ic-lg"><use href="#i-glasses"/></svg></div>
+                    <div class="name">쿨 선글라스</div>
+                    <div class="price">보유</div>
+                  </div>
+                  <div class="goods">
+                    <div class="img"><svg class="ic ic-lg"><use href="#i-ribbon"/></svg></div>
+                    <div class="name">스카프</div>
+                    <div class="price">보유</div>
+                  </div>
+                  <div class="goods">
+                    <div class="img"><svg class="ic ic-lg"><use href="#i-crown"/></svg></div>
+                    <div class="name">황금 왕관</div>
+                    <div class="price">1,500</div>
+                  </div>
+                  <div class="goods">
+                    <div class="img"><svg class="ic ic-lg"><use href="#i-cape"/></svg></div>
+                    <div class="name">슈퍼 망토</div>
+                    <div class="price">800</div>
+                  </div>
+                  <div class="goods">
+                    <div class="img"><svg class="ic ic-lg"><use href="#i-doboc"/></svg></div>
+                    <div class="name">태권도복</div>
+                    <div class="price">500</div>
+                  </div>
+                  <div class="goods">
+                    <div class="img"><svg class="ic ic-lg"><use href="#i-ribbon"/></svg></div>
+                    <div class="name">리본 헤어밴드</div>
+                    <div class="price">300</div>
+                  </div>
+                  <div class="goods">
+                    <div class="img"><svg class="ic ic-lg"><use href="#i-rabbit"/></svg></div>
+                    <div class="name">토끼 귀</div>
+                    <div class="price">300</div>
+                  </div>
+                  <div class="goods">
+                    <div class="img"><svg class="ic ic-lg"><use href="#i-tennis"/></svg></div>
+                    <div class="name">공 펫</div>
+                    <div class="price">1,200</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="padding:12px 16px 14px;border-top:1px solid var(--line);background:#fff">
+                <button class="kbtn lg block">적용하기</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="phone-caption"><strong>12 캐릭터 꾸미기</strong><br/>3D 프리뷰 + 스토어 그리드</p>
+    </div>
+
+    <div style="align-self:stretch;display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div style="font-size:14px;font-weight:800;color:var(--k-blue-depth);margin-bottom:6px">카테고리</div>
+        <ul style="margin:0;padding-left:18px;font-size:12px;line-height:1.8;color:var(--ink-sub)">
+          <li>모자 · 안경 · 의상 · 소품 · 펫</li>
+          <li>각 카테고리별 슬롯 1개씩 착용</li>
+          <li>MVP에서는 결제 UI까지만, 실결제 P3로 이관</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div style="font-size:14px;font-weight:800;color:var(--k-blue-depth);margin-bottom:6px">캐시 획득처</div>
+        <ul style="margin:0;padding-left:18px;font-size:12px;line-height:1.8;color:var(--ink-sub)">
+          <li>게임 클리어 +50 (별 3개 시 +100)</li>
+          <li>출석 보너스 (7일 연속 +200)</li>
+          <li>주간 랭킹 1~3위 추가 보상</li>
+          <li>도장 대회 이벤트 상금</li>
+        </ul>
+      </div>
+      <div class="card" style="background:var(--k-blue);color:#fff;border-color:var(--k-blue-outline);box-shadow:inset 0 2px 0 rgba(255,255,255,.35), inset 0 -5px 0 var(--k-blue-depth)">
+        <div style="font-size:14px;font-weight:800;margin-bottom:6px;text-shadow:0 1px 0 rgba(0,0,0,.2)">10대 UX 핵심</div>
+        <div style="font-size:12px;line-height:1.7;opacity:.95">
+          "보상이 눈에 보이고, 콤보가 시원하게 터지고, 내 캐릭터가 멋있어지는 것" — 이 세 가지를 매 세션 경험하게 만드는 게 재방문율의 핵심.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- 에셋 요약                                                       -->
+<!-- ============================================================ -->
+<section class="section">
+  <div class="asset-box">
+    <h3><svg class="ic"><use href="#i-sparkle"/></svg> 실제 로드된 에셋</h3>
+    <p>게임 화면의 3D 뷰는 jumprope 폴더에 있는 Kenney 에셋을 Three.js로 직접 로드합니다. 로드 실패 시 플레이스홀더로 폴백.</p>
+    <div class="asset-grid">
+      <div class="asset-item">
+        <div class="k"><svg class="ic ic-sm"><use href="#i-user"/></svg> 캐릭터</div>
+        <div class="v">Mini Characters 1 / character-female-a.glb</div>
+      </div>
+      <div class="asset-item">
+        <div class="k"><svg class="ic ic-sm"><use href="#i-car"/></svg> 레이싱 차량</div>
+        <div class="v">Car Kit / race.glb</div>
+      </div>
+      <div class="asset-item">
+        <div class="k"><svg class="ic ic-sm"><use href="#i-flag"/></svg> 도로</div>
+        <div class="v">Racing Kit / roadStraight.glb</div>
+      </div>
+      <div class="asset-item">
+        <div class="k"><svg class="ic ic-sm"><use href="#i-grid"/></svg> UI 컴포넌트</div>
+        <div class="v">UI Pack / Blue / button · check · star · arrow</div>
+      </div>
+      <div class="asset-item">
+        <div class="k"><svg class="ic ic-sm"><use href="#i-sparkle"/></svg> 숫자 폰트</div>
+        <div class="v">Kenney Future.ttf</div>
+      </div>
+      <div class="asset-item">
+        <div class="k"><svg class="ic ic-sm"><use href="#i-running"/></svg> 애니메이션</div>
+        <div class="v">Animated Characters 2 / jump · idle · run</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  줄넘기 체크 MVP · v0.2 Kenney UI Pack Blue · 2026.04.24<br/>
+  Pretendard (한글) · Kenney Future (숫자) · Kenney Blue #1EA9DA
+</footer>
+
+
+<!-- ================ Three.js 3D Preview ================ -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+const MODELS = {
+  'character':         'Kenney%20Game%20Assets%20All-in-1%203.4.0/3D%20assets/Mini%20Characters%201/Models/GLB%20format/character-female-a.glb',
+  'character-preview': 'Kenney%20Game%20Assets%20All-in-1%203.4.0/3D%20assets/Mini%20Characters%201/Models/GLB%20format/character-female-a.glb',
+  'car':               'Car%20Kit/Models/GLB%20format/race.glb'
+};
+
+const loader = new GLTFLoader();
+
+function setupScene(container, modelKey) {
+  const url = MODELS[modelKey];
+  if (!url) return;
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+  if (!width || !height) return;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(35, width/height, 0.1, 100);
+  camera.position.set(3, 2.2, 4);
+  camera.lookAt(0, 0.8, 0);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(width, height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x334466, 1.1);
+  scene.add(hemi);
+  const dir = new THREE.DirectionalLight(0xffffff, 1.4);
+  dir.position.set(3, 5, 2);
+  scene.add(dir);
+
+  loader.load(
+    url,
+    (gltf) => {
+      const model = gltf.scene;
+      const box = new THREE.Box3().setFromObject(model);
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+      model.position.sub(center);
+      const targetSize = 2.2;
+      const scale = targetSize / Math.max(size.x, size.y, size.z);
+      model.scale.setScalar(scale);
+      if (modelKey === 'car') {
+        model.position.y += 0.2;
+        camera.position.set(2.6, 1.4, 3.2);
+        camera.lookAt(0, 0.3, 0);
+      } else {
+        model.position.y += 0.8;
+      }
+      scene.add(model);
+      container.innerHTML = '';
+      container.appendChild(renderer.domElement);
+      renderer.domElement.className = 'three-canvas';
+      function animate() {
+        model.rotation.y += 0.008;
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+      }
+      animate();
+    },
+    undefined,
+    (err) => { console.warn('GLB load failed', url, err); }
+  );
+}
+
+function init() {
+  document.querySelectorAll('[data-three]').forEach(el => {
+    setupScene(el, el.dataset.three);
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+
+</body>
+</html>

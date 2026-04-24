@@ -27,7 +27,7 @@ export default function RacingJumpPage() {
   const handleClose = useCallback(() => router.back(), [router]);
 
   return (
-    <div className="relative min-h-dvh bg-black text-white overflow-hidden">
+    <div className="relative h-dvh bg-black text-white overflow-hidden">
       <video
         ref={videoRef}
         className={

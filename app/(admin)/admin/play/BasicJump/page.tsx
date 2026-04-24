@@ -14,13 +14,7 @@ type Phase = "calibrating" | "playing" | "ended";
 
 export default function BasicJumpPage() {
   const router = useRouter();
-  const {
-    phase: posePhase,
-    status: poseStatus,
-    errorMsg,
-    videoRef,
-    landmarksRef,
-  } = usePoseDetection(true);
+  const { phase: posePhase, status: poseStatus, errorMsg, videoRef, landmarksRef } = usePoseDetection(true);
 
   const [phase, setPhase] = useState<Phase>("calibrating");
   const [jumpCount, setJumpCount] = useState(0);
@@ -65,49 +59,16 @@ export default function BasicJumpPage() {
   }, [phase]);
 
   return (
-    <div className="relative min-h-dvh bg-black overflow-hidden">
-      <video
-        ref={videoRef}
-        className={
-          "absolute inset-0 w-full h-full object-cover [transform:scaleX(-1)] " +
-          (phase === "calibrating" ? "opacity-100" : "opacity-0 pointer-events-none")
-        }
-        playsInline
-        muted
-      />
+    <div className="relative h-dvh bg-black overflow-hidden">
+      <video ref={videoRef} className={"absolute inset-0 w-full h-full object-cover [transform:scaleX(-1)] " + (phase === "calibrating" ? "opacity-100" : "opacity-0 pointer-events-none")} playsInline muted />
 
-      {phase !== "calibrating" && (
-        <GameScene
-          landmarksRef={landmarksRef}
-          onJump={handleJump}
-          frozen={phase === "ended"}
-        />
-      )}
+      {phase !== "calibrating" && <GameScene landmarksRef={landmarksRef} onJump={handleJump} frozen={phase === "ended"} />}
 
-      <PositionLoading
-        open={phase === "calibrating"}
-        phase={posePhase}
-        status={poseStatus}
-        errorMsg={errorMsg}
-        ready={true}
-        videoRef={videoRef}
-        landmarksRef={landmarksRef}
-        onDismiss={handlePositionReady}
-        onClose={handleClose}
-      />
+      <PositionLoading open={phase === "calibrating"} phase={posePhase} status={poseStatus} errorMsg={errorMsg} ready={true} videoRef={videoRef} landmarksRef={landmarksRef} onDismiss={handlePositionReady} onClose={handleClose} />
 
-      {(phase === "playing" || phase === "ended") && (
-        <JumpHUD count={jumpCount} timeLeft={timeLeft} totalTime={GAME_DURATION} />
-      )}
+      {(phase === "playing" || phase === "ended") && <JumpHUD count={jumpCount} timeLeft={timeLeft} totalTime={GAME_DURATION} />}
 
-      {phase === "ended" && (
-        <ResultDialog
-          count={jumpCount}
-          totalTime={GAME_DURATION}
-          onExit={handleExit}
-          onRetry={handleRetry}
-        />
-      )}
+      {phase === "ended" && <ResultDialog count={jumpCount} totalTime={GAME_DURATION} onExit={handleExit} onRetry={handleRetry} />}
     </div>
   );
 }

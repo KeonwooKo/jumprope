@@ -26,9 +26,7 @@ export default function PlayPage() {
         </section>
 
         <section>
-          <h2 className="text-[11px] font-bold text-ink-sub uppercase tracking-wider mb-2">
-            게임 모드
-          </h2>
+          <h2 className="text-[11px] font-bold text-ink-sub uppercase tracking-wider mb-2">게임 모드</h2>
           <div className="space-y-3">
             {games.map((g) => (
               <GameCard key={g.id} game={g} />

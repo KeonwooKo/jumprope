@@ -154,7 +154,7 @@ export function GameScene({ landmarksRef, onJump, frozen }: Props) {
   );
 
   return (
-    <Canvas className="absolute inset-0 h-dvh" camera={{ position: [0, 1.4, 3.6], fov: 42 }} shadows>
+    <Canvas className="absolute inset-0 h-dvh" camera={{ position: [0, 1, 3.6], fov: 42 }} shadows>
       <ambientLight intensity={0.5} />
       <directionalLight position={[4, 6, 3]} intensity={1.1} castShadow />
       <Suspense fallback={null}>

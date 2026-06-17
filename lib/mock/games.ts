@@ -1,5 +1,5 @@
 export type Game = {
-  id: "grassland" | "racing";
+  id: "grassland" | "racing" | "demo";
   title: string;
   desc: string;
   route: string;
@@ -8,6 +8,14 @@ export type Game = {
 };
 
 export const games: Game[] = [
+  {
+    id: "demo",
+    title: "🔥 동작 인식 데모",
+    desc: "5가지 줄넘기 동작 실시간 인식",
+    route: "/admin/play/JumpDemo",
+    available: true,
+    accent: "from-violet-400 to-fuchsia-500",
+  },
   {
     id: "grassland",
     title: "초원 점프",

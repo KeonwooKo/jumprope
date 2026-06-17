@@ -7,7 +7,6 @@ import { PositionLoading } from "../_components/PositionLoading";
 import { DemoScene } from "./_components/DemoScene";
 import { DemoHUD } from "./_components/DemoHUD";
 import type { JumpEvent } from "@/lib/use-jump-classification";
-import { cn } from "@/lib/utils";
 
 type Phase = "calibrating" | "demo";
 
@@ -38,10 +37,7 @@ export default function JumpDemoPage() {
     <div className="relative h-dvh bg-black overflow-hidden">
       <video
         ref={videoRef}
-        className={cn(
-          "absolute inset-0 w-full h-full object-cover transform-[scaleX(-1)]",
-          phase === "calibrating" ? "opacity-100" : "opacity-0 pointer-events-none"
-        )}
+        className="absolute inset-0 w-full h-full object-cover transform-[scaleX(-1)]"
         playsInline
         muted
       />

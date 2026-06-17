@@ -10,11 +10,11 @@ type Props = {
 };
 
 const JUMP_TYPE_LABELS: Record<JumpType, { kr: string; en: string; color: string; icon: string }> = {
-  basic: { kr: "기본", en: "Basic", color: "bg-slate-500", icon: "⬆️" },
-  cross: { kr: "X자", en: "Cross", color: "bg-emerald-500", icon: "❌" },
-  alternate: { kr: "번갈아", en: "Alternate", color: "bg-blue-500", icon: "🦵" },
-  "arm-cross": { kr: "십자", en: "Arm Cross", color: "bg-purple-500", icon: "✖️" },
+  basic: { kr: "모아뛰기", en: "Basic", color: "bg-slate-500", icon: "⬆️" },
+  cross: { kr: "X자", en: "Cross", color: "bg-red-500", icon: "✖️" },
+  "rock-paper": { kr: "보바위", en: "Rock-Paper", color: "bg-emerald-500", icon: "✊✋" },
   zigzag: { kr: "지그재그", en: "Zigzag", color: "bg-orange-500", icon: "↔️" },
+  "side-swing": { kr: "옆흔들어", en: "Side Swing", color: "bg-purple-500", icon: "↪️" },
 };
 
 export function DemoHUD({ jumpHistory, onClose, onReset }: Props) {

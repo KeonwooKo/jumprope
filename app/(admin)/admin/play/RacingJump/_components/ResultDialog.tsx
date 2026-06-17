@@ -1,5 +1,6 @@
 import { KButton } from "@/components/KButton";
 import { Icon } from "@/components/Icon";
+import { cn } from "@/lib/utils";
 
 type Props = {
   elapsedMs: number;
@@ -43,7 +44,7 @@ export function ResultDialog({ elapsedMs, goalDistance, onExit, onRetry }: Props
             <Icon
               key={i}
               name="star"
-              className={"w-10 h-10 " + (i < stars ? "text-gold fill-gold" : "text-line-2")}
+              className={cn("w-10 h-10", i < stars ? "text-gold fill-gold" : "text-line-2")}
             />
           ))}
         </div>

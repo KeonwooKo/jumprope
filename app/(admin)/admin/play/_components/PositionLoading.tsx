@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type RefObject } from "react";
 import type { NormalizedLandmark } from "@mediapipe/tasks-vision";
 import { Icon } from "@/components/Icon";
 import type { PoseDetectionPhase, PoseStatus } from "@/lib/use-pose-detection";
+import { cn } from "@/lib/utils";
 
 type Props = {
   open: boolean;
@@ -177,9 +178,10 @@ export function PositionLoading({ open, phase, status, errorMsg, ready, videoRef
           <Icon name="close" className="w-4 h-4" />
         </button>
         <div
-          className={
-            "flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[11px] font-bold text-white border-[1.5px] backdrop-blur-sm " + (ok ? "bg-[rgba(43,214,123,0.3)] border-[rgba(43,214,123,0.5)]" : "bg-white/10 border-white/20")
-          }
+          className={cn(
+            "flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[11px] font-bold text-white border-[1.5px] backdrop-blur-sm",
+            ok ? "bg-[rgba(43,214,123,0.3)] border-[rgba(43,214,123,0.5)]" : "bg-white/10 border-white/20"
+          )}
         >
           <Icon name={ok ? "check" : "camera"} className="w-4 h-4" />
           {ok ? "감지 완료" : phase === "detecting" ? "거리 감지 중" : "준비 중"}
@@ -191,16 +193,16 @@ export function PositionLoading({ open, phase, status, errorMsg, ready, videoRef
         {(["tl", "tr", "bl", "br"] as const).map((p) => (
           <span
             key={p}
-            className={
-              "absolute w-[22px] h-[22px] border-[3px] " +
-              (p === "tl"
+            className={cn(
+              "absolute w-[22px] h-[22px] border-[3px]",
+              p === "tl"
                 ? "-top-[3px] -left-[3px] border-r-0 border-b-0 rounded-tl-[22px]"
                 : p === "tr"
                   ? "-top-[3px] -right-[3px] border-l-0 border-b-0 rounded-tr-[22px]"
                   : p === "bl"
                     ? "-bottom-[3px] -left-[3px] border-r-0 border-t-0 rounded-bl-[22px]"
-                    : "-bottom-[3px] -right-[3px] border-l-0 border-t-0 rounded-br-[22px]")
-            }
+                    : "-bottom-[3px] -right-[3px] border-l-0 border-t-0 rounded-br-[22px]"
+            )}
             style={{ borderColor: accentHex }}
           />
         ))}
@@ -209,13 +211,13 @@ export function PositionLoading({ open, phase, status, errorMsg, ready, videoRef
       {/* Bubble */}
       <div className="absolute bottom-[148px] left-1/2 -translate-x-1/2 z-10">
         <div
-          className={
-            "relative bg-white border-2 rounded-[14px] px-3.5 py-2.5 font-bold text-xs whitespace-nowrap " +
-            (ok ? "border-[#00864a] text-[#0a6339] shadow-[0_4px_0_rgba(0,134,74,0.2)]" : "border-[#b07600] text-[#704b00] shadow-[0_4px_0_rgba(176,118,0,0.2)]")
-          }
+          className={cn(
+            "relative bg-white border-2 rounded-[14px] px-3.5 py-2.5 font-bold text-xs whitespace-nowrap",
+            ok ? "border-[#00864a] text-[#0a6339] shadow-[0_4px_0_rgba(0,134,74,0.2)]" : "border-[#b07600] text-[#704b00] shadow-[0_4px_0_rgba(176,118,0,0.2)]"
+          )}
         >
           {bubbleText}
-          <span className={"absolute -bottom-[8px] left-6 w-3 h-3 bg-white rotate-45 border-r-2 border-b-2 " + (ok ? "border-[#00864a]" : "border-[#b07600]")} />
+          <span className={cn("absolute -bottom-[8px] left-6 w-3 h-3 bg-white rotate-45 border-r-2 border-b-2", ok ? "border-[#00864a]" : "border-[#b07600]")} />
         </div>
       </div>
 

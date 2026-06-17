@@ -7,6 +7,7 @@ import { PositionLoading } from "../_components/PositionLoading";
 import { RaceScene, GOAL_DISTANCE, MAX_SPEED_EXPORTED } from "./_components/RaceScene";
 import { RaceHUD } from "./_components/RaceHUD";
 import { ResultDialog } from "./_components/ResultDialog";
+import { cn } from "@/lib/utils";
 
 type Phase = "calibrating" | "playing" | "ended";
 
@@ -81,10 +82,10 @@ export default function RacingJumpPage() {
     <div className="relative h-dvh bg-black overflow-hidden">
       <video
         ref={videoRef}
-        className={
-          "absolute inset-0 w-full h-full object-cover [transform:scaleX(-1)] " +
-          (phase === "calibrating" ? "opacity-100" : "opacity-0 pointer-events-none")
-        }
+        className={cn(
+          "absolute inset-0 w-full h-full object-cover transform-[scaleX(-1)]",
+          phase === "calibrating" ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
         playsInline
         muted
       />

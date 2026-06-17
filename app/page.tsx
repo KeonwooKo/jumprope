@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { KButton } from "@/components/KButton";
 import { Icon } from "@/components/Icon";
+import { cn } from "@/lib/utils";
 
 type Tab = "dojo" | "member";
 
@@ -33,12 +34,12 @@ export default function LoginPage() {
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={
-                "py-2.5 rounded-[9px] text-center font-bold text-[13px] cursor-pointer " +
-                (active
+              className={cn(
+                "py-2.5 rounded-[9px] text-center font-bold text-[13px] cursor-pointer",
+                active
                   ? "text-white border-[1.5px] border-k-blue-outline bg-[linear-gradient(180deg,var(--color-k-blue-hi),var(--color-k-blue-mid))] shadow-[inset_0_1px_0_rgba(255,255,255,.45),inset_0_-3px_0_var(--color-k-blue-depth)] [text-shadow:0_1px_0_rgba(0,0,0,.2)]"
-                  : "text-ink-sub")
-              }
+                  : "text-ink-sub"
+              )}
             >
               {t === "dojo" ? "도장 어드민" : "회원"}
             </button>

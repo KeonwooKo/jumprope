@@ -1,6 +1,6 @@
 export function IconsSprite() {
   return (
-    <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden>
+    <svg width="0" height="0" className="absolute" aria-hidden="true">
       <defs>
         <symbol id="i-home" viewBox="0 0 24 24">
           <path d="M3 11 L12 4 L21 11 V20 H14 V14 H10 V20 H3 Z" />

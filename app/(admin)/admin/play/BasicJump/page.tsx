@@ -7,6 +7,7 @@ import { PositionLoading } from "../_components/PositionLoading";
 import { GameScene } from "./_components/GameScene";
 import { JumpHUD } from "./_components/JumpHUD";
 import { ResultDialog } from "./_components/ResultDialog";
+import { cn } from "@/lib/utils";
 
 const GAME_DURATION = 60;
 
@@ -60,7 +61,7 @@ export default function BasicJumpPage() {
 
   return (
     <div className="relative h-dvh bg-black overflow-hidden">
-      <video ref={videoRef} className={"absolute inset-0 w-full h-full object-cover [transform:scaleX(-1)] " + (phase === "calibrating" ? "opacity-100" : "opacity-0 pointer-events-none")} playsInline muted />
+      <video ref={videoRef} className={cn("absolute inset-0 w-full h-full object-cover transform-[scaleX(-1)]", phase === "calibrating" ? "opacity-100" : "opacity-0 pointer-events-none")} playsInline muted />
 
       {phase !== "calibrating" && <GameScene landmarksRef={landmarksRef} onJump={handleJump} frozen={phase === "ended"} />}
 

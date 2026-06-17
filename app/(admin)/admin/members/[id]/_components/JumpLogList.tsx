@@ -1,5 +1,6 @@
 import { Icon } from "@/components/Icon";
 import type { Session } from "@/lib/mock/sessions";
+import { cn } from "@/lib/utils";
 
 type Props = {
   sessions: Session[];
@@ -41,7 +42,7 @@ export function JumpLogList({ sessions }: Props) {
                 <Icon
                   key={j}
                   name="star"
-                  className={"w-3 h-3 " + (j < s.stars ? "text-gold fill-gold" : "text-line-2")}
+                  className={cn("w-3 h-3", j < s.stars ? "text-gold fill-gold" : "text-line-2")}
                 />
               ))}
             </div>

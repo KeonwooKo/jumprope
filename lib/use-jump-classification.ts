@@ -204,17 +204,30 @@ function analyzeJumpFrame(frames: NormalizedLandmark[][]): JumpEvent {
       const shoulderCenterX = (leftShoulder.x + rightShoulder.x) / 2;
       const shoulderWidth = Math.abs(leftShoulder.x - rightShoulder.x);
 
-      // 손목이 중심선 교차 + 손목 높이 비슷
+      // X자 판정 조건 강화
+      // 1. 손목이 중심선을 넘어 반대편으로
       const leftWristCrossed = leftWrist.x > shoulderCenterX;
       const rightWristCrossed = rightWrist.x < shoulderCenterX;
+
+      // 2. 각 손목이 중심선에서 어깨너비의 20% 이상 멀리 (확실한 교차)
+      const leftCrossDistance = leftWrist.x - shoulderCenterX;
+      const rightCrossDistance = shoulderCenterX - rightWrist.x;
+
+      // 3. 손목 높이 비슷 (수평 교차)
       const wristHeightDiff = Math.abs(leftWrist.y - rightWrist.y);
-      const crossDepth = Math.abs(leftWrist.x - shoulderCenterX) + Math.abs(shoulderCenterX - rightWrist.x);
+
+      // 4. 손목이 가슴/배 높이 (너무 위나 아래 아님)
+      const avgWristY = (leftWrist.y + rightWrist.y) / 2;
+      const avgShoulderY = (leftShoulder.y + rightShoulder.y) / 2;
+      const isChestLevel = Math.abs(avgWristY - avgShoulderY) < shoulderWidth * 0.8;
 
       if (
         leftWristCrossed &&
         rightWristCrossed &&
-        wristHeightDiff < shoulderWidth * 0.4 &&
-        crossDepth > shoulderWidth * 0.4
+        leftCrossDistance > shoulderWidth * 0.2 &&  // 강화: 0.2 이상
+        rightCrossDistance > shoulderWidth * 0.2 && // 강화: 0.2 이상
+        wristHeightDiff < shoulderWidth * 0.3 &&    // 강화: 0.3 이하
+        isChestLevel
       ) {
         armCrossedCount++;
       }

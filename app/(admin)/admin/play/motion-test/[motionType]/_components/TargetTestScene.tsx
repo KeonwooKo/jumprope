@@ -3,12 +3,13 @@
 import { useEffect, useRef, Suspense, type RefObject } from "react";
 import { Canvas } from "@react-three/fiber";
 import type { NormalizedLandmark } from "@mediapipe/tasks-vision";
-import { JumpClassifier, type JumpEvent, type JumpType } from "@/lib/use-jump-classification";
+import { TargetJumpClassifier, type TargetJumpEvent } from "@/lib/use-jump-classification-target";
+import type { JumpType } from "@/lib/use-jump-classification";
 
 type Props = {
   landmarksRef: RefObject<NormalizedLandmark[] | null>;
   targetMotion: JumpType;
-  onJump: (event: JumpEvent) => void;
+  onJump: (event: TargetJumpEvent) => void;
 };
 
 const POSE_CONNECTIONS: [number, number][] = [
@@ -101,7 +102,12 @@ export function TargetTestScene({ landmarksRef, targetMotion, onJump }: Props) {
         style={{ opacity: 0 }}
       >
         <Suspense fallback={null}>
-          <JumpClassifier landmarksRef={landmarksRef} onJump={onJump} enabled={true} />
+          <TargetJumpClassifier
+            landmarksRef={landmarksRef}
+            targetMotion={targetMotion}
+            onJump={onJump}
+            enabled={true}
+          />
         </Suspense>
       </Canvas>
     </>

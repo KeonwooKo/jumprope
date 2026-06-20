@@ -68,10 +68,10 @@ export function TargetTestHUD({ motionDef, testResults, onClose, onReset }: Prop
             <div className="text-center">
               <div className="text-3xl mb-2">{latestResult.isMatch ? "✅" : "❌"}</div>
               <div className="font-extrabold text-sm mb-1">
-                {latestResult.jump.type === motionDef.id ? motionDef.name : getMotionLabel(latestResult.jump.type)}
+                {latestResult.isMatch ? motionDef.name : "미인식"}
               </div>
               <div className="text-xs opacity-90">
-                {Math.round(latestResult.jump.confidence * 100)}% 신뢰도
+                {Math.round(latestResult.confidence * 100)}% 신뢰도
               </div>
             </div>
           </div>
@@ -126,7 +126,7 @@ export function TargetTestHUD({ motionDef, testResults, onClose, onReset }: Prop
                           result.isMatch ? "text-green-300" : "text-red-300"
                         }`}
                       >
-                        #{testResults.length - idx} {result.isMatch ? motionDef.name : getMotionLabel(result.jump.type)}
+                        #{testResults.length - idx} {result.isMatch ? motionDef.name : "미인식"}
                       </div>
                       <div className="text-white/60 text-[10px] mt-0.5 leading-relaxed">
                         {result.reason}

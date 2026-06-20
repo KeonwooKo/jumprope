@@ -8,15 +8,12 @@ import { TargetTestScene } from "./_components/TargetTestScene";
 import { TargetTestHUD } from "./_components/TargetTestHUD";
 import { DebugOverlay } from "./_components/DebugOverlay";
 import { getMotionDefinition } from "@/lib/mock/motion-types";
-import type { JumpEvent, JumpType } from "@/lib/use-jump-classification";
+import type { TargetJumpEvent } from "@/lib/use-jump-classification-target";
+import type { JumpType } from "@/lib/use-jump-classification";
 
 type Phase = "calibrating" | "testing";
 
-export type TestResult = {
-  jump: JumpEvent;
-  isMatch: boolean;
-  reason: string;
-};
+export type TestResult = TargetJumpEvent;
 
 export default function MotionTestPage() {
   const router = useRouter();
@@ -29,39 +26,10 @@ export default function MotionTestPage() {
   const [phase, setPhase] = useState<Phase>("calibrating");
   const [testResults, setTestResults] = useState<TestResult[]>([]);
 
-  const handleJump = useCallback((event: JumpEvent) => {
-    const isMatch = event.type === targetMotion;
-
-    // 판정 이유 생성
-    let reason = "";
-    if (isMatch) {
-      reason = `✅ 정확히 인식됨 (신뢰도 ${Math.round(event.confidence * 100)}%)`;
-      if (event.isArmCrossed) reason += " / 팔 교차 OK";
-      if (event.isCrossed) reason += " / 발 교차 OK";
-      if (event.isWide) reason += " / 발 벌림 OK";
-    } else {
-      reason = `❌ ${getMotionLabel(event.type)}로 인식됨`;
-      if (targetMotion === "cross") {
-        if (!event.isArmCrossed) reason += " / 팔 교차 부족";
-        else reason += " / 다른 동작과 혼동";
-      } else if (targetMotion === "rock-paper") {
-        if (event.isCrossed) reason += " / 발이 교차됨";
-        else if (!event.isWide) reason += " / 발을 더 벌리세요";
-      } else if (targetMotion === "zigzag") {
-        if (!event.isWide && !event.isCrossed) reason += " / 발 동작 불분명";
-      } else if (targetMotion === "side-swing") {
-        if (event.sideDirection === "center") reason += " / 좌우 이동 부족";
-      }
-    }
-
-    const result: TestResult = {
-      jump: event,
-      isMatch,
-      reason,
-    };
-
-    setTestResults((prev) => [...prev, result].slice(-20));
-  }, [targetMotion]);
+  const handleJump = useCallback((event: TargetJumpEvent) => {
+    // 이제 이벤트 자체에 isMatch와 reason이 포함되어 있음
+    setTestResults((prev) => [...prev, event].slice(-20));
+  }, []);
 
   const handlePositionReady = useCallback(() => {
     setPhase("testing");

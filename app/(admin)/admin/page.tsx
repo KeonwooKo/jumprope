@@ -22,22 +22,37 @@ export default function AdminHome() {
       />
 
       <div className="flex-1 overflow-auto p-4 space-y-5">
-        <Link
-          href="/admin/play"
-          className="relative block overflow-hidden rounded-2xl p-5 text-white bg-[linear-gradient(135deg,var(--color-k-blue-hi),var(--color-k-blue-depth))] border-2 border-k-blue-outline shadow-[inset_0_2px_0_rgba(255,255,255,.45),inset_0_-5px_0_rgba(10,65,90,.35)]"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm grid place-items-center">
-              <Icon name="play" className="w-6 h-6" />
+        <div className="grid grid-cols-2 gap-3">
+          <Link
+            href="/admin/play"
+            className="relative block overflow-hidden rounded-2xl p-4 text-white bg-[linear-gradient(135deg,var(--color-k-blue-hi),var(--color-k-blue-depth))] border-2 border-k-blue-outline shadow-[inset_0_2px_0_rgba(255,255,255,.45),inset_0_-5px_0_rgba(10,65,90,.35)]"
+          >
+            <div className="flex flex-col items-start gap-2">
+              <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm grid place-items-center">
+                <Icon name="play" className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[10px] font-bold uppercase tracking-wider opacity-80">게임</div>
+                <div className="font-extrabold text-sm [text-shadow:0_1px_0_rgba(10,65,90,.35)]">시작하기</div>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[11px] font-bold uppercase tracking-wider opacity-80">오늘의 세션</div>
-              <div className="font-extrabold text-lg [text-shadow:0_1px_0_rgba(10,65,90,.35)]">게임 시작하기</div>
-              <div className="text-[11px] mt-0.5 opacity-90">도장에서 회원 플레이 시작</div>
+          </Link>
+
+          <Link
+            href="/admin/diagnostics"
+            className="relative block overflow-hidden rounded-2xl p-4 text-white bg-[linear-gradient(135deg,#8b5cf6,#6d28d9)] border-2 border-purple-400 shadow-[inset_0_2px_0_rgba(255,255,255,.45),inset_0_-5px_0_rgba(55,48,163,.35)]"
+          >
+            <div className="flex flex-col items-start gap-2">
+              <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm grid place-items-center">
+                <Icon name="target" className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[10px] font-bold uppercase tracking-wider opacity-80">진단</div>
+                <div className="font-extrabold text-sm [text-shadow:0_1px_0_rgba(55,48,163,.35)]">테스트</div>
+              </div>
             </div>
-            <Icon name="chevron-right" className="w-5 h-5" />
-          </div>
-        </Link>
+          </Link>
+        </div>
 
         <section>
           <h2 className="text-[11px] font-bold text-ink-sub uppercase tracking-wider mb-2">

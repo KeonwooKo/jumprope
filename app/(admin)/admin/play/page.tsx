@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { MHeader } from "@/components/MHeader";
 import { Icon } from "@/components/Icon";
 import { GameCard } from "./_components/GameCard";
@@ -23,6 +24,25 @@ export default function PlayPage() {
               <div className="font-num text-xl font-extrabold leading-none">D-{tournament.dday}</div>
             </div>
           </div>
+        </section>
+
+        <section>
+          <h2 className="text-[11px] font-bold text-ink-sub uppercase tracking-wider mb-2">동작 인식 테스트 (POC)</h2>
+          <Link
+            href="/admin/play/motion-test"
+            className="block bg-purple-500 border-2 border-purple-600 rounded-2xl p-4 text-white shadow-[inset_0_2px_0_rgba(255,255,255,.3)] active:scale-[0.98] transition-transform"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-white/20 backdrop-blur-sm grid place-items-center">
+                <Icon name="target" className="w-6 h-6" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-extrabold text-[15px]">줄넘기 동작 인식</div>
+                <div className="text-[11px] mt-0.5 opacity-90">개별 테스트 · 통합 테스트</div>
+              </div>
+              <Icon name="chevron-right" className="w-5 h-5" />
+            </div>
+          </Link>
         </section>
 
         <section>

@@ -112,7 +112,7 @@ export function extractPoseMetrics(landmarks: NormalizedLandmark[] | null): Pose
 
   // 높이 계산
   const hipY = (lhip.y + rhip.y) / 2;
-  const hipZ = (lhip.z ?? 0 + rhip.z ?? 0) / 2;
+  const hipZ = ((lhip.z ?? 0) + (rhip.z ?? 0)) / 2;
   const shoulderY = lshoulder && rshoulder ? (lshoulder.y + rshoulder.y) / 2 : hipY;
   const kneeY = (lknee.y + rknee.y) / 2;
   const ankleY = lms[LANDMARKS.LEFT_ANKLE] && lms[LANDMARKS.RIGHT_ANKLE]

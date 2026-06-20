@@ -6,6 +6,7 @@ import { usePoseDetection } from "@/lib/use-pose-detection";
 import { PositionLoading } from "../../_components/PositionLoading";
 import { TargetTestScene } from "./_components/TargetTestScene";
 import { TargetTestHUD } from "./_components/TargetTestHUD";
+import { DebugOverlay } from "./_components/DebugOverlay";
 import { getMotionDefinition } from "@/lib/mock/motion-types";
 import type { JumpEvent, JumpType } from "@/lib/use-jump-classification";
 
@@ -89,7 +90,7 @@ export default function MotionTestPage() {
     <div className="relative h-dvh bg-black overflow-hidden">
       <video
         ref={videoRef}
-        className="absolute inset-0 w-full h-full object-cover [transform:scaleX(-1)]"
+        className="absolute inset-0 w-full h-full object-cover transform-[scaleX(-1)]"
         playsInline
         muted
       />
@@ -115,12 +116,15 @@ export default function MotionTestPage() {
       />
 
       {phase === "testing" && (
-        <TargetTestHUD
-          motionDef={motionDef}
-          testResults={testResults}
-          onClose={handleClose}
-          onReset={handleReset}
-        />
+        <>
+          <TargetTestHUD
+            motionDef={motionDef}
+            testResults={testResults}
+            onClose={handleClose}
+            onReset={handleReset}
+          />
+          <DebugOverlay landmarksRef={landmarksRef} />
+        </>
       )}
     </div>
   );

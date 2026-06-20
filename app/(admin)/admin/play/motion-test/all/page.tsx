@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePoseDetection } from "@/lib/use-pose-detection";
 import { PositionLoading } from "../../_components/PositionLoading";
-import { DemoScene } from "../../JumpDemo/_components/DemoScene";
+import { DemoScene } from "./_components/DemoScene";
 import { AllTestHUD } from "./_components/AllTestHUD";
 import type { JumpEvent } from "@/lib/use-jump-classification";
 

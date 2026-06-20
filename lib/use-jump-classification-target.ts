@@ -8,10 +8,9 @@ import type { JumpType } from "./use-jump-classification";
 export type TargetJumpEvent = {
   type: JumpType;
   timestamp: number;
-  isMatch: boolean;  // 타겟 동작과 일치하는가?
+  isMatch: boolean;
   confidence: number;
-  reason: string;    // 판정 이유
-  // 디버깅용 원본 데이터
+  reason: string;
   raw: {
     ankleDistance: number;
     isCrossed: boolean;
@@ -28,12 +27,11 @@ type Props = {
   enabled?: boolean;
 };
 
-// Tuning parameters
+// BasicJump과 동일한 파라미터
 const BASELINE_ALPHA = 0.02;
-const JUMP_UP_THRESHOLD = 0.04;  // 엉덩이 상승 기준
+const JUMP_UP_THRESHOLD = 0.04;
 const JUMP_RESET_THRESHOLD = 0.02;
 const VIS_THRESHOLD = 0.5;
-const ANKLE_JUMP_THRESHOLD = 0.03;  // 발 상승 기준
 
 // 랜드마크 인덱스
 const LANDMARK = {
@@ -41,18 +39,15 @@ const LANDMARK = {
   RIGHT_SHOULDER: 12,
   LEFT_HIP: 23,
   RIGHT_HIP: 24,
-  LEFT_KNEE: 25,
-  RIGHT_KNEE: 26,
   LEFT_ANKLE: 27,
   RIGHT_ANKLE: 28,
   LEFT_WRIST: 15,
   RIGHT_WRIST: 16,
 };
 
-// 타겟 모드 전용 점프 분류기
+// 타겟 모드 전용 점프 분류기 (BasicJump 기반)
 export function TargetJumpClassifier({ landmarksRef, targetMotion, onJump, enabled = true }: Props) {
-  const baselineHipYRef = useRef<number | null>(null);
-  const baselineAnkleYRef = useRef<number | null>(null);
+  const baselineYRef = useRef<number | null>(null);
   const isInAirRef = useRef(false);
   const frameHistoryRef = useRef<NormalizedLandmark[][]>([]);
 
@@ -61,61 +56,45 @@ export function TargetJumpClassifier({ landmarksRef, targetMotion, onJump, enabl
     const lms = landmarksRef.current;
     if (!lms) return;
 
+    // BasicJump과 동일: 엉덩이만 체크
     const leftHip = lms[LANDMARK.LEFT_HIP];
     const rightHip = lms[LANDMARK.RIGHT_HIP];
-    const leftAnkle = lms[LANDMARK.LEFT_ANKLE];
-    const rightAnkle = lms[LANDMARK.RIGHT_ANKLE];
+    if (!leftHip || !rightHip) return;
 
-    if (!leftHip || !rightHip || !leftAnkle || !rightAnkle) return;
-
-    const vis = Math.min(
-      leftHip.visibility ?? 0,
-      rightHip.visibility ?? 0,
-      leftAnkle.visibility ?? 0,
-      rightAnkle.visibility ?? 0
-    );
+    const vis = Math.min(leftHip.visibility ?? 0, rightHip.visibility ?? 0);
     if (vis < VIS_THRESHOLD) return;
 
     const hipY = (leftHip.y + rightHip.y) / 2;
-    const ankleY = (leftAnkle.y + rightAnkle.y) / 2;
 
-    // 기준선 초기화
-    if (baselineHipYRef.current === null || baselineAnkleYRef.current === null) {
-      baselineHipYRef.current = hipY;
-      baselineAnkleYRef.current = ankleY;
+    if (baselineYRef.current === null) {
+      baselineYRef.current = hipY;
       return;
     }
 
-    const hipDelta = baselineHipYRef.current - hipY;
-    const ankleDelta = baselineAnkleYRef.current - ankleY;
+    const delta = baselineYRef.current - hipY;
 
-    // 기준선 업데이트 (지면에 있을 때)
-    if (Math.abs(hipDelta) < 0.015) {
-      baselineHipYRef.current =
-        baselineHipYRef.current * (1 - BASELINE_ALPHA) + hipY * BASELINE_ALPHA;
-      baselineAnkleYRef.current =
-        baselineAnkleYRef.current * (1 - BASELINE_ALPHA) + ankleY * BASELINE_ALPHA;
+    // 기준선 업데이트
+    if (Math.abs(delta) < 0.015) {
+      baselineYRef.current = baselineYRef.current * (1 - BASELINE_ALPHA) + hipY * BASELINE_ALPHA;
     }
 
-    // 프레임 히스토리 수집 (점프 중)
-    if (hipDelta > JUMP_RESET_THRESHOLD) {
+    // 프레임 수집 (동작 분류용)
+    if (delta > JUMP_RESET_THRESHOLD) {
       frameHistoryRef.current.push([...lms]);
       if (frameHistoryRef.current.length > 10) {
         frameHistoryRef.current.shift();
       }
     }
 
-    // 점프 감지: 엉덩이 + 발 모두 올라가야 함
-    const isValidJump = hipDelta > JUMP_UP_THRESHOLD && ankleDelta > ANKLE_JUMP_THRESHOLD;
-
-    if (isValidJump && !isInAirRef.current) {
+    // 점프 감지 (BasicJump와 동일)
+    if (delta > JUMP_UP_THRESHOLD && !isInAirRef.current) {
       isInAirRef.current = true;
-    } else if (hipDelta < JUMP_RESET_THRESHOLD && ankleDelta < JUMP_RESET_THRESHOLD && isInAirRef.current) {
+    } else if (delta < JUMP_RESET_THRESHOLD && isInAirRef.current) {
       isInAirRef.current = false;
 
-      // 착지 시점: 기본 점프 검증 + 타겟 동작 체크
+      // 착지 시 동작 분류
       const jumpData = analyzeJumpFrame(frameHistoryRef.current);
-      const result = checkTargetMotion(targetMotion, jumpData, { hipDelta, ankleDelta });
+      const result = checkTargetMotion(targetMotion, jumpData);
 
       onJump(result);
       frameHistoryRef.current = [];
@@ -257,133 +236,82 @@ function analyzeJumpFrame(frames: NormalizedLandmark[][]) {
 // 타겟 동작 체크 (해당 동작만 판정)
 function checkTargetMotion(
   targetMotion: JumpType,
-  raw: ReturnType<typeof analyzeJumpFrame>,
-  jumpMetrics: { hipDelta: number; ankleDelta: number }
+  raw: ReturnType<typeof analyzeJumpFrame>
 ): TargetJumpEvent {
   const timestamp = Date.now();
 
-  // 기본 점프 검증
-  const hasValidJump = jumpMetrics.hipDelta > JUMP_UP_THRESHOLD && jumpMetrics.ankleDelta > ANKLE_JUMP_THRESHOLD;
-
   switch (targetMotion) {
     case "basic": {
-      // 모아뛰기: 기본 점프 + 추가 동작 없음
+      // 모아뛰기: 추가 동작 없음
       const isClean = !raw.isArmCrossed && !raw.isCrossed && !raw.isWide;
-      const isMatch = hasValidJump && isClean;
-
-      let reason = "";
-      if (!hasValidJump) {
-        reason = `❌ 점프 높이 부족 (엉덩이 ${(jumpMetrics.hipDelta * 100).toFixed(1)}%, 발 ${(jumpMetrics.ankleDelta * 100).toFixed(1)}% / 필요: 엉덩이 4%, 발 3%)`;
-      } else if (!isClean) {
-        const issues = [];
-        if (raw.isArmCrossed) issues.push("팔 교차");
-        if (raw.isCrossed) issues.push("발 교차");
-        if (raw.isWide) issues.push("발 벌림");
-        reason = `❌ 불필요한 동작: ${issues.join(", ")}`;
-      } else {
-        reason = `✅ 깔끔한 모아뛰기 (엉덩이↑${(jumpMetrics.hipDelta * 100).toFixed(1)}%, 발↑${(jumpMetrics.ankleDelta * 100).toFixed(1)}%)`;
-      }
 
       return {
         type: "basic",
         timestamp,
-        isMatch,
-        confidence: isMatch ? 0.9 : 0.3,
-        reason,
+        isMatch: isClean,
+        confidence: isClean ? 0.9 : 0.5,
+        reason: isClean
+          ? "✅ 모아뛰기 인식"
+          : `❌ ${raw.isArmCrossed ? "팔 교차" : ""}${raw.isCrossed ? "발 교차" : ""}${raw.isWide ? "발 벌림" : ""} 감지`,
         raw,
       };
     }
 
     case "cross": {
-      // X자: 기본 점프 + 팔 교차
-      const isMatch = hasValidJump && raw.isArmCrossed;
-
-      let reason = "";
-      if (!hasValidJump) {
-        reason = `❌ 점프 높이 부족 (엉덩이 ${(jumpMetrics.hipDelta * 100).toFixed(1)}%, 발 ${(jumpMetrics.ankleDelta * 100).toFixed(1)}%)`;
-      } else if (!raw.isArmCrossed) {
-        reason = "❌ 팔 교차 부족 - 가슴 앞에서 확실히 교차하세요";
-      } else {
-        reason = "✅ X자 완성 (점프 + 팔 교차)";
-      }
-
+      // X자: 팔 교차
       return {
         type: "cross",
         timestamp,
-        isMatch,
-        confidence: isMatch ? 0.9 : 0.3,
-        reason,
+        isMatch: raw.isArmCrossed,
+        confidence: raw.isArmCrossed ? 0.9 : 0.3,
+        reason: raw.isArmCrossed
+          ? "✅ X자 인식 (팔 교차)"
+          : "❌ 팔 교차 부족",
         raw,
       };
     }
 
     case "rock-paper": {
-      // 보바위: 기본 점프 + 발 벌림 (교차 없음)
-      const isValid = hasValidJump && raw.isWide && !raw.isCrossed;
-
-      let reason = "";
-      if (!hasValidJump) {
-        reason = "❌ 점프 높이 부족";
-      } else if (!raw.isWide) {
-        reason = "❌ 발을 더 벌리세요";
-      } else if (raw.isCrossed) {
-        reason = "❌ 발이 교차됨 (벌리기만 해야 함)";
-      } else {
-        reason = "✅ 보바위 완성 (점프 + 발 벌림)";
-      }
-
+      // 보바위: 발 벌림 (교차 없음)
+      const isValid = raw.isWide && !raw.isCrossed;
       return {
         type: "rock-paper",
         timestamp,
         isMatch: isValid,
         confidence: isValid ? 0.85 : 0.3,
-        reason,
+        reason: isValid
+          ? "✅ 보바위 인식 (발 벌림)"
+          : `❌ ${!raw.isWide ? "발 벌림 부족" : "발이 교차됨"}`,
         raw,
       };
     }
 
     case "zigzag": {
-      // 지그재그: 기본 점프 + 발 교차 또는 발 벌림
-      const isValid = hasValidJump && (raw.isCrossed || raw.isWide);
-
-      let reason = "";
-      if (!hasValidJump) {
-        reason = "❌ 점프 높이 부족";
-      } else if (!raw.isCrossed && !raw.isWide) {
-        reason = "❌ 발을 교차하거나 벌리세요";
-      } else {
-        reason = `✅ 지그재그 (점프 + ${raw.isCrossed ? "발 교차" : "발 벌림"})`;
-      }
-
+      // 지그재그: 발 교차 또는 발 벌림
+      const isValid = raw.isCrossed || raw.isWide;
       return {
         type: "zigzag",
         timestamp,
         isMatch: isValid,
         confidence: isValid ? 0.8 : 0.3,
-        reason,
+        reason: isValid
+          ? `✅ 지그재그 인식 (${raw.isCrossed ? "발 교차" : "발 벌림"})`
+          : "❌ 발 동작 부족",
         raw,
       };
     }
 
     case "side-swing": {
-      // 옆 흔들어: 기본 점프 + 좌우 이동
-      const isValid = hasValidJump && raw.sideDirection !== "center";
-
-      let reason = "";
-      if (!hasValidJump) {
-        reason = "❌ 점프 높이 부족";
-      } else if (raw.sideDirection === "center") {
-        reason = "❌ 좌우로 몸을 더 기울이세요";
-      } else {
-        reason = `✅ 옆흔들기 (점프 + ${raw.sideDirection === "left" ? "왼쪽" : "오른쪽"} 이동)`;
-      }
-
+      // 옆 흔들어: 좌우 이동
+      const isValid = raw.sideDirection !== "center";
       return {
         type: "side-swing",
         timestamp,
         isMatch: isValid,
         confidence: isValid ? 0.85 : 0.3,
-        reason,
+        reason: isValid
+          ? `✅ 옆흔들기 인식 (${raw.sideDirection})`
+          : "❌ 좌우 이동 부족",
         raw,
       };
     }

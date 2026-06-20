@@ -80,7 +80,7 @@ export function TargetJumpClassifier({ landmarksRef, targetMotion, onJump, enabl
     const ankleY = (leftAnkle.y + rightAnkle.y) / 2;
 
     // 기준선 초기화
-    if (baselineHipYRef.current === null) {
+    if (baselineHipYRef.current === null || baselineAnkleYRef.current === null) {
       baselineHipYRef.current = hipY;
       baselineAnkleYRef.current = ankleY;
       return;

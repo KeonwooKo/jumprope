@@ -7,7 +7,6 @@ export { classifySideSwingJump } from "./side-swing-classifier";
 
 export type { MotionJumpEvent, JumpFrameData, MotionClassifier } from "./types";
 export { LANDMARK, COMMON_PARAMS } from "./types";
-export { analyzeJumpFrames } from "./frame-analyzer";
 
 // 동작별 분류기 매핑
 import type { JumpType } from "../use-jump-classification";

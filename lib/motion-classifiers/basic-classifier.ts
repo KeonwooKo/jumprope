@@ -1,39 +1,74 @@
 import type { NormalizedLandmark } from "@mediapipe/tasks-vision";
 import type { MotionJumpEvent } from "./types";
-import { analyzeJumpFrames } from "./frame-analyzer";
 
-// 모아뛰기 전용 분류기 (매우 엄격)
+const LANDMARK = {
+  LEFT_HIP: 23,
+  RIGHT_HIP: 24,
+  LEFT_ANKLE: 27,
+  RIGHT_ANKLE: 28,
+} as const;
+
+// 모아뛰기: 발이 모아져 있으면 OK
 export function classifyBasicJump(frames: NormalizedLandmark[][]): MotionJumpEvent {
-  const raw = analyzeJumpFrames(frames);
-  const timestamp = Date.now();
+  if (frames.length < 2) {
+    return {
+      type: "basic",
+      timestamp: Date.now(),
+      isMatch: false,
+      confidence: 0,
+      reason: "프레임 부족",
+      raw: { ankleDistance: 0, isCrossed: false, isWide: false, sideDirection: "center", isArmCrossed: false },
+    };
+  }
 
-  // 모아뛰기 조건: 추가 동작이 전혀 없어야 함
-  const hasArmCross = raw.isArmCrossed;
-  const hasFootCross = raw.isCrossed;
-  const hasFootWide = raw.isWide;
-  const hasSideMove = raw.sideDirection !== "center";
+  // 중간 프레임들만 체크
+  const midFrames = frames.slice(
+    Math.floor(frames.length * 0.3),
+    Math.floor(frames.length * 0.7)
+  );
 
-  // 발 간격이 너무 넓으면 안됨 (엄격한 threshold)
-  const ankleDistanceTooWide = raw.ankleDistance > 0.15;
+  let totalAnkleDistance = 0;
+  let validCount = 0;
 
-  const isClean = !hasArmCross && !hasFootCross && !hasFootWide && !hasSideMove && !ankleDistanceTooWide;
+  for (const lms of midFrames) {
+    const leftAnkle = lms[LANDMARK.LEFT_ANKLE];
+    const rightAnkle = lms[LANDMARK.RIGHT_ANKLE];
+    const leftHip = lms[LANDMARK.LEFT_HIP];
+    const rightHip = lms[LANDMARK.RIGHT_HIP];
 
-  // 오탐 이유 수집
-  const reasons: string[] = [];
-  if (hasArmCross) reasons.push("팔 교차");
-  if (hasFootCross) reasons.push("발 교차");
-  if (hasFootWide) reasons.push("발 벌림");
-  if (hasSideMove) reasons.push(`좌우 이동(${raw.sideDirection})`);
-  if (ankleDistanceTooWide) reasons.push(`발 간격 과다(${raw.ankleDistance.toFixed(2)})`);
+    if (!leftAnkle || !rightAnkle || !leftHip || !rightHip) continue;
+
+    const hipWidth = Math.abs(leftHip.x - rightHip.x);
+    const ankleDistance = Math.abs(leftAnkle.x - rightAnkle.x);
+
+    totalAnkleDistance += ankleDistance / hipWidth; // 정규화
+    validCount++;
+  }
+
+  if (validCount === 0) {
+    return {
+      type: "basic",
+      timestamp: Date.now(),
+      isMatch: false,
+      confidence: 0,
+      reason: "랜드마크 없음",
+      raw: { ankleDistance: 0, isCrossed: false, isWide: false, sideDirection: "center", isArmCrossed: false },
+    };
+  }
+
+  const avgDistance = totalAnkleDistance / validCount;
+
+  // 발이 엉덩이 폭보다 좁으면 모아뛰기
+  const isNarrow = avgDistance < 1.2;
 
   return {
     type: "basic",
-    timestamp,
-    isMatch: isClean,
-    confidence: isClean ? 0.95 : 0.3,
-    reason: isClean
-      ? "✅ 모아뛰기 인식"
-      : `❌ ${reasons.join(", ")} 감지`,
-    raw,
+    timestamp: Date.now(),
+    isMatch: isNarrow,
+    confidence: isNarrow ? 0.95 : 0.3,
+    reason: isNarrow
+      ? `✅ 모아뛰기 인식 (발 간격: ${avgDistance.toFixed(2)})`
+      : `❌ 발이 벌어짐 (${avgDistance.toFixed(2)})`,
+    raw: { ankleDistance: avgDistance, isCrossed: false, isWide: !isNarrow, sideDirection: "center", isArmCrossed: false },
   };
 }

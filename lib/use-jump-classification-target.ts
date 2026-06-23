@@ -73,7 +73,10 @@ export function TargetJumpClassifier({ landmarksRef, targetMotion, onJump, enabl
       // 착지 시 동작 분류 (전용 분류기 사용)
       const result = classifyJumpByMotion(frameHistoryRef.current, targetMotion);
 
-      onJump(result);
+      // 매칭될 때만 UI에 전달 (준비 동작은 무시)
+      if (result.isMatch) {
+        onJump(result);
+      }
       frameHistoryRef.current = [];
     }
   });

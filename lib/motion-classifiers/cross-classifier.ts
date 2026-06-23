@@ -38,11 +38,45 @@ export function classifyCrossJump(frames: NormalizedLandmark[][]): MotionJumpEve
     if (!leftWrist || !rightWrist || !leftShoulder || !rightShoulder) continue;
 
     const shoulderCenterX = (leftShoulder.x + rightShoulder.x) / 2;
+    const shoulderWidth = Math.abs(leftShoulder.x - rightShoulder.x);
 
-    // 왼손이 중심 오른쪽에, 오른손이 중심 왼쪽에 있으면 교차
-    if (leftWrist.x > shoulderCenterX && rightWrist.x < shoulderCenterX) {
-      crossedCount++;
+    // 1. 기본 교차 체크: 왼손이 오른쪽, 오른손이 왼쪽
+    const leftWristCrossed = leftWrist.x > shoulderCenterX;
+    const rightWristCrossed = rightWrist.x < shoulderCenterX;
+
+    if (!leftWristCrossed || !rightWristCrossed) {
+      validCount++;
+      continue;
     }
+
+    // 2. 교차 거리 체크: 어깨 폭의 20% 이상
+    const leftCrossDistance = leftWrist.x - shoulderCenterX;
+    const rightCrossDistance = shoulderCenterX - rightWrist.x;
+
+    if (leftCrossDistance < shoulderWidth * 0.2 || rightCrossDistance < shoulderWidth * 0.2) {
+      validCount++;
+      continue;
+    }
+
+    // 3. 양손 높이 체크: 비슷한 높이여야 함 (어깨 폭의 30% 이내)
+    const wristHeightDiff = Math.abs(leftWrist.y - rightWrist.y);
+    if (wristHeightDiff > shoulderWidth * 0.3) {
+      validCount++;
+      continue;
+    }
+
+    // 4. 가슴 높이 체크: 손목이 어깨와 비슷한 높이 (어깨 폭의 80% 이내)
+    const avgWristY = (leftWrist.y + rightWrist.y) / 2;
+    const avgShoulderY = (leftShoulder.y + rightShoulder.y) / 2;
+    const isChestLevel = Math.abs(avgWristY - avgShoulderY) < shoulderWidth * 0.8;
+
+    if (!isChestLevel) {
+      validCount++;
+      continue;
+    }
+
+    // 모든 조건 통과 → 교차 인정
+    crossedCount++;
     validCount++;
   }
 

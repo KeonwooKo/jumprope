@@ -41,9 +41,9 @@ export function classifyCrossJump(frames: NormalizedLandmark[][]): MotionJumpEve
     const shoulderCenterX = (leftShoulder.x + rightShoulder.x) / 2;
     const shoulderWidth = Math.abs(leftShoulder.x - rightShoulder.x);
 
-    // 1. 기본 교차 체크: 왼손이 오른쪽, 오른손이 왼쪽
-    const leftWristCrossed = leftWrist.x > shoulderCenterX;
-    const rightWristCrossed = rightWrist.x < shoulderCenterX;
+    // 1. 기본 교차 체크: 왼손이 왼쪽, 오른손이 오른쪽 (반전)
+    const leftWristCrossed = leftWrist.x < shoulderCenterX;
+    const rightWristCrossed = rightWrist.x > shoulderCenterX;
 
     if (!leftWristCrossed || !rightWristCrossed) {
       validCount++;
@@ -51,8 +51,8 @@ export function classifyCrossJump(frames: NormalizedLandmark[][]): MotionJumpEve
     }
 
     // 2. 교차 거리 체크: 어깨 폭의 20% 이상
-    const leftCrossDistance = leftWrist.x - shoulderCenterX;
-    const rightCrossDistance = shoulderCenterX - rightWrist.x;
+    const leftCrossDistance = shoulderCenterX - leftWrist.x; // 반전
+    const rightCrossDistance = rightWrist.x - shoulderCenterX; // 반전
     const leftCrossRatio = leftCrossDistance / shoulderWidth;
     const rightCrossRatio = rightCrossDistance / shoulderWidth;
 

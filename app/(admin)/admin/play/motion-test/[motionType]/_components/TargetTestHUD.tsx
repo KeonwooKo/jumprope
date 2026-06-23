@@ -86,7 +86,7 @@ export function TargetTestHUD({ motionDef, testResults, onClose, onReset }: Prop
 
         {/* 최근 로그 - 간소화 */}
         <div className="bg-white/5 backdrop-blur-md rounded-xl p-2.5 border border-white/10">
-          <div className="space-y-1 max-h-24 overflow-y-auto">
+          <div className="space-y-1 max-h-32 overflow-y-auto">
             {recentResults.length === 0 ? (
               <div className="text-white/40 text-[10px] text-center py-2">
                 {motionDef.description}
@@ -95,16 +95,26 @@ export function TargetTestHUD({ motionDef, testResults, onClose, onReset }: Prop
               recentResults.slice(0, 3).map((result, idx) => (
                 <div
                   key={testResults.length - idx}
-                  className="flex items-center gap-2 text-[10px]"
+                  className="space-y-0.5"
                 >
-                  <div className="shrink-0">
-                    {result.isMatch ? "✅" : "❌"}
+                  <div className="flex items-center gap-2 text-[10px]">
+                    <div className="shrink-0">
+                      {result.isMatch ? "✅" : "❌"}
+                    </div>
+                    <div className={`flex-1 min-w-0 truncate ${
+                      result.isMatch ? "text-green-300" : "text-red-300"
+                    }`}>
+                      {result.reason}
+                    </div>
                   </div>
-                  <div className={`flex-1 min-w-0 truncate ${
-                    result.isMatch ? "text-green-300" : "text-red-300"
-                  }`}>
-                    {result.reason}
-                  </div>
+                  {/* 디버그 정보 */}
+                  {result.debug && result.debug.length > 0 && (
+                    <div className="ml-5 text-[9px] text-yellow-300/80 space-y-0.5">
+                      {result.debug.map((info, i) => (
+                        <div key={i} className="truncate">• {info}</div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))
             )}

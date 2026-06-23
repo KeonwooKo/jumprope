@@ -105,11 +105,6 @@ export function classifyCrossJump(frames: NormalizedLandmark[][]): MotionJumpEve
   const crossRatio = crossedCount / validCount;
   const isCrossed = crossRatio > 0.5;
 
-  // 디버그 정보 출력 (개발 중)
-  if (debugInfo.length > 0) {
-    console.log(`[X자 분석] ${crossedCount}/${validCount} (${(crossRatio * 100).toFixed(0)}%)`, debugInfo.slice(0, 3));
-  }
-
   return {
     type: "cross",
     timestamp: Date.now(),
@@ -119,5 +114,6 @@ export function classifyCrossJump(frames: NormalizedLandmark[][]): MotionJumpEve
       ? `✅ X자 인식 (${crossedCount}/${validCount} 프레임)`
       : `❌ 팔 교차 부족 (${crossedCount}/${validCount})`,
     raw: { ankleDistance: 0, isCrossed: false, isWide: false, sideDirection: "center", isArmCrossed: isCrossed },
+    debug: [`${crossedCount}/${validCount} (${(crossRatio * 100).toFixed(0)}%)`, ...debugInfo.slice(0, 5)],
   };
 }

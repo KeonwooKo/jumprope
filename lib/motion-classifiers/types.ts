@@ -9,6 +9,7 @@ export type MotionJumpEvent = {
   confidence: number;
   reason: string;
   raw: JumpFrameData;
+  debug?: string[]; // 디버그 정보 (개발용)
 };
 
 // 프레임 분석 결과
